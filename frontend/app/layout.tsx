@@ -71,11 +71,11 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
         <head>
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
         </head>
-        <body className="font-[var(--font-inter)] antialiased">
+        <body className="font-[var(--font-inter)] antialiased" suppressHydrationWarning>
 
           <QueryProvider>
             <CartProvider>
