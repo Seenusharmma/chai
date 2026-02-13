@@ -34,50 +34,22 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const OrderSchema = new mongoose_1.Schema({
-    orderType: {
-        type: String,
-        required: true,
-        enum: ['dine-in', 'parcel'],
-    },
-    items: [
-        {
-            itemId: { type: String, required: true },
-            name: { type: String, required: true },
-            price: { type: Number, required: true },
-            quantity: { type: Number, required: true },
-        },
-    ],
-    totalAmount: {
-        type: Number,
-        required: true,
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'accepted', 'declined', 'completed'],
-        default: 'pending',
-    },
-    userEmail: {
-        type: String,
-        required: false, // Make it optional if user doesn't log in, but requirement said "history for specific user email" so likely required for that feature.
-    },
-    customerName: {
-        type: String,
-        required: true,
-    },
-    phoneNumber: {
-        type: String,
-        required: function () {
-            return this.orderType === 'parcel';
-        },
-    },
-    address: {
-        type: String,
-        required: function () {
-            return this.orderType === 'parcel';
-        },
-    },
+const SizeSchema = new mongoose_1.Schema({
+    name: { type: String, enum: ['small', 'medium', 'large'], required: true },
+    price: { type: Number, required: true },
+});
+const MenuItemSchema = new mongoose_1.Schema({
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    image: { type: String, required: true },
+    category: { type: String, required: true },
+    rating: { type: Number, default: 0 },
+    isPopular: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
+    sizes: [SizeSchema],
+    isVeg: { type: Boolean, default: true },
 }, {
     timestamps: true,
 });
-exports.default = mongoose_1.default.model('Order', OrderSchema);
+exports.default = mongoose_1.default.model('MenuItem', MenuItemSchema);

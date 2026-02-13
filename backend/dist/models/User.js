@@ -34,50 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const OrderSchema = new mongoose_1.Schema({
-    orderType: {
+const UserSchema = new mongoose_1.Schema({
+    clerkId: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    name: { type: String },
+    role: {
         type: String,
-        required: true,
-        enum: ['dine-in', 'parcel'],
-    },
-    items: [
-        {
-            itemId: { type: String, required: true },
-            name: { type: String, required: true },
-            price: { type: Number, required: true },
-            quantity: { type: Number, required: true },
-        },
-    ],
-    totalAmount: {
-        type: Number,
-        required: true,
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'accepted', 'declined', 'completed'],
-        default: 'pending',
-    },
-    userEmail: {
-        type: String,
-        required: false, // Make it optional if user doesn't log in, but requirement said "history for specific user email" so likely required for that feature.
-    },
-    customerName: {
-        type: String,
-        required: true,
-    },
-    phoneNumber: {
-        type: String,
-        required: function () {
-            return this.orderType === 'parcel';
-        },
-    },
-    address: {
-        type: String,
-        required: function () {
-            return this.orderType === 'parcel';
-        },
+        enum: ['user', 'admin', 'super-admin'],
+        default: 'user',
     },
 }, {
     timestamps: true,
 });
-exports.default = mongoose_1.default.model('Order', OrderSchema);
+exports.default = mongoose_1.default.model('User', UserSchema);
