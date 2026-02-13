@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Colors */
+    --color-primary: 212 65% 64%;
+    --color-primary-light: 36 48% 76%;
+    --color-primary-dark: 30 36% 60%;
+
+    --color-bg: 25 20% 8%;
+    --color-bg-secondary: 20 10% 16%;
+    --color-bg-card: 20 8% 22%;
+
+    --color-accent-cream: 36 48% 90%;
+    --color-accent-tan: 30 48% 64%;
+    --color-accent-brown: 36 32% 42%;
+
+    --color-text-primary: 0 0% 100%;
+    --color-text-secondary: 36 48% 76%;
+    --color-text-muted: 30 12% 64%;
+
+    /* Spacing */
+    --spacing-section: 5rem;
+    --spacing-card: 1.5rem;
+
+    /* Border Radius */
+    --radius-card: 1.5rem;
+    --radius-button: 0.75rem;
+  }
+
+  * {
+    @apply border-white/10;
+  }
+
+  body {
+    @apply bg-[#1A1410] text-white antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[#2D2520];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#D4A574] rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#C8956E];
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass-effect {
+    background: rgba(58, 50, 48, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[#E8C9A0] to-[#D4A574] bg-clip-text text-transparent;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(212, 165, 116, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(212, 165, 116, 0.5);
+  }
+}
