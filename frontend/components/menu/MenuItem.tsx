@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, CircleDot } from 'lucide-react';
 import { MenuItem as MenuItemType } from '@/lib/types';
 import { Card } from '../ui/Card';
 import { AddToCartButton } from '../cart/AddToCartButton';
@@ -23,6 +23,17 @@ export function MenuItem({ item }: MenuItemProps) {
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, 33vw"
                 />
+
+                {/* Veg/Non-Veg Badge */}
+                <div className="absolute top-3 left-3">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        item.isVeg 
+                            ? 'bg-green-500/90' 
+                            : 'bg-red-500/90'
+                    }`}>
+                        <CircleDot className="w-3 h-3 text-white" />
+                    </div>
+                </div>
 
                 {/* Plus Button Overlay */}
                 <div className="absolute bottom-3 right-3">

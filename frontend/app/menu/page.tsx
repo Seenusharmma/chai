@@ -1,22 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronLeft, Coffee, Utensils, Croissant, IceCream } from 'lucide-react';
+import { Search, ChevronLeft, CircleDot } from 'lucide-react';
 import { useMenu } from '@/lib/hooks/useMenu';
+import { useCategories } from '@/lib/hooks/useCategories';
 import { Category } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { Header } from '@/components/layout/Header';
 import { MenuItem } from '@/components/menu/MenuItem';
-
-const categories = [
-    { id: 'all', label: 'All', icon: Coffee },
-    { id: 'coffee', label: 'Coffee', icon: Coffee },
-    { id: 'food', label: 'Food', icon: Utensils },
-    { id: 'pastries', label: 'Pastries', icon: Croissant },
-    { id: 'desserts', label: 'Desserts', icon: IceCream },
-];
 
 export default function MenuPage() {
     const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
@@ -28,6 +21,46 @@ export default function MenuPage() {
         activeCategory === 'all' ? undefined : activeCategory,
         searchQuery
     );
+
+    const { categories: backendCategories, isLoading: categoriesLoading } = useCategories();
+
+    const categories = useMemo(() => {
+        const backendCats = backendCategories.length > 0 ? backendCategories : [];
+        
+        if (backendCats.length === 0) {
+            return [
+                { id: 'all' as const, label: 'All', icon: CircleDot },
+                { id: 'biriyani' as const, label: 'Biriyani', icon: CircleDot },
+                { id: 'chicken' as const, label: 'Chicken', icon: CircleDot },
+                { id: 'mutton' as const, label: 'Mutton', icon: CircleDot },
+                { id: 'egg' as const, label: 'Egg', icon: CircleDot },
+                { id: 'veg' as const, label: 'Veg', icon: CircleDot },
+                { id: 'rice' as const, label: 'Rice', icon: CircleDot },
+                { id: 'roti' as const, label: 'Roti', icon: CircleDot },
+                { id: 'roll' as const, label: 'Roll', icon: CircleDot },
+                { id: 'soup' as const, label: 'Soup', icon: CircleDot },
+                { id: 'noodles' as const, label: 'Noodles', icon: CircleDot },
+                { id: 'bread' as const, label: 'Bread', icon: CircleDot },
+                { id: 'sandwich' as const, label: 'Sandwich', icon: CircleDot },
+                { id: 'burger' as const, label: 'Burger', icon: CircleDot },
+                { id: 'momo' as const, label: 'Momo', icon: CircleDot },
+                { id: 'salad' as const, label: 'Salad', icon: CircleDot },
+                { id: 'tea' as const, label: 'Tea', icon: CircleDot },
+                { id: 'coffee' as const, label: 'Coffee', icon: CircleDot },
+                { id: 'mocktails' as const, label: 'Mocktails', icon: CircleDot },
+                { id: 'maggie' as const, label: 'Maggie', icon: CircleDot },
+            ];
+        }
+        
+        return [
+            { id: 'all' as const, label: 'All', icon: CircleDot },
+            ...backendCats.map((cat: any) => ({
+                id: cat.id || cat,
+                label: cat.name || cat.label || cat,
+                icon: CircleDot,
+            }))
+        ];
+    }, [backendCategories]);
 
     return (
         <main className="min-h-screen bg-[#1A1410] pb-24 md:pb-0 font-['Outfit']">

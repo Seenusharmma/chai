@@ -284,15 +284,36 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
               />
               <span className="text-xs text-white">Has Sizes</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.isVeg}
-                onChange={(e) => setFormData({ ...formData, isVeg: e.target.checked })}
-                className="w-4 h-4 rounded border-white/20 bg-[#1A1410] text-[#D4A574] focus:ring-[#D4A574]"
-              />
-              <span className="text-xs text-white">Vegetarian</span>
-            </label>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#A89B8F] mr-1">Food Type:</span>
+              <div className="flex rounded-lg overflow-hidden border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, isVeg: true })}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all ${
+                    formData.isVeg
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : 'bg-[#1A1410] text-[#A89B8F] hover:bg-[#2D2520]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  Veg
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, isVeg: false })}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all ${
+                    !formData.isVeg
+                      ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      : 'bg-[#1A1410] text-[#A89B8F] hover:bg-[#2D2520]'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                  Non-Veg
+                </button>
+              </div>
+            </div>
           </div>
 
           {hasSizes && (

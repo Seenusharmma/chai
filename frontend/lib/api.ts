@@ -48,3 +48,8 @@ export const deleteMenuItem = async (id: string) => {
   const response = await api.delete(`/menu/${id}`);
   return response.data;
 };
+
+export const getCategories = async () => {
+  const response = await api.get('/menu/categories');
+  return response.data;
+};

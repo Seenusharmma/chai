@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, TrendingUp, Menu, X, Coffee, ShoppingCart, Clock, CheckCircle, Check, Users, History, Archive, DollarSign, Receipt } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, Menu, X, Coffee, ShoppingCart, Clock, CheckCircle, Check, Users, History, Archive, DollarSign, Receipt, CircleDot, RotateCcw } from 'lucide-react';
 import Image from 'next/image';
 import { useMenu } from '@/lib/hooks/useMenu';
 import { useAdminOrders } from '@/lib/hooks/useAdminOrders';
@@ -71,6 +71,20 @@ export default function AdminDashboard() {
             setDeletingItemId(null);
         } catch (error) {
             console.error('Error deleting item:', error);
+        }
+    };
+
+    const handleToggleVegNonVeg = async (item: any) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            await fetch(`${API_URL}/menu/${item.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...item, isVeg: !item.isVeg }),
+            });
+            refetch();
+        } catch (error) {
+            console.error('Error toggling veg/non-veg:', error);
         }
     };
 
@@ -318,7 +332,20 @@ export default function AdminDashboard() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <h3 className="font-medium text-white text-sm truncate">{item.name}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="font-medium text-white text-sm truncate">{item.name}</h3>
+                                                    <button
+                                                        onClick={() => handleToggleVegNonVeg(item)}
+                                                        className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+                                                            item.isVeg 
+                                                                ? 'bg-green-500/20 hover:bg-green-500/30' 
+                                                                : 'bg-red-500/20 hover:bg-red-500/30'
+                                                        }`}
+                                                        title={item.isVeg ? 'Click to make Non-Veg' : 'Click to make Veg'}
+                                                    >
+                                                        <CircleDot className={`w-3 h-3 ${item.isVeg ? 'text-green-400' : 'text-red-400'}`} />
+                                                    </button>
+                                                </div>
                                                 <p className="text-[10px] text-[#A89B8F] capitalize">{item.category}</p>
                                             </div>
                                             <span className="font-bold text-[#D4A574] text-sm">₹{item.price.toFixed(0)}</span>
