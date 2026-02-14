@@ -42,11 +42,11 @@ const getAdminNotificationMessage = (order, isNewOrder = false) => {
 };
 const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaiter(void 0, [userEmail_1, orderId_1, status_1, ...args_1], void 0, function* (userEmail, orderId, status, isAdmin = false) {
     try {
-        console.log(`Sending push notification to: ${userEmail}, isAdmin: ${isAdmin}`);
-        const subscriptions = yield PushSubscription_1.PushSubscription.find({ userEmail });
-        console.log('Found subscriptions:', subscriptions.length);
+        console.log(`[Push] Sending to: ${userEmail}, isAdmin: ${isAdmin}`);
+        const subscriptions = yield PushSubscription_1.PushSubscription.find({ userEmail: userEmail.toLowerCase() });
+        console.log(`[Push] Found subscriptions for ${userEmail}:`, subscriptions.length);
         if (subscriptions.length === 0) {
-            console.log('No subscriptions found for user');
+            console.log(`[Push] ⚠️ No subscriptions found for ${userEmail}. User needs to enable notifications!`);
             return;
         }
         for (const sub of subscriptions) {
@@ -65,27 +65,29 @@ const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaite
                     isAdmin,
                 },
             };
-            console.log('Sending push notification to endpoint:', sub.subscription.endpoint);
+            console.log(`[Push] Sending to endpoint: ${sub.subscription.endpoint.substring(0, 50)}...`);
             const result = yield (0, webPush_1.sendPushNotification)(sub.subscription, payload);
             if ((result === null || result === void 0 ? void 0 : result.error) === 'expired') {
-                console.log('Subscription expired, removing...');
+                console.log('[Push] Subscription expired, removing...');
                 yield PushSubscription_1.PushSubscription.deleteOne({ _id: sub._id });
             }
             else if ((result === null || result === void 0 ? void 0 : result.error) === 'failed') {
-                console.log('Push notification failed');
+                console.log('[Push] ❌ Push notification failed');
             }
             else {
-                console.log('Push notification sent successfully');
+                console.log('[Push] ✅ Push notification sent successfully');
             }
         }
     }
     catch (error) {
-        console.error('Push notification error:', error);
+        console.error('[Push] Error:', error);
     }
 });
 const sendPushToAdmin = (order_1, ...args_1) => __awaiter(void 0, [order_1, ...args_1], void 0, function* (order, isNewOrder = false) {
     var _a;
-    yield sendPushToUser(ADMIN_EMAIL, ((_a = order._id) === null || _a === void 0 ? void 0 : _a.toString()) || order._id, order.status || 'pending', true);
+    console.log(`[Push] === Sending to ADMIN ===`);
+    console.log(`[Push] Admin email: ${ADMIN_EMAIL}`);
+    yield sendPushToUser(ADMIN_EMAIL.toLowerCase(), ((_a = order._id) === null || _a === void 0 ? void 0 : _a.toString()) || order._id, order.status || 'pending', true);
 });
 // @desc    Create new order
 // @route   POST /api/orders
@@ -144,7 +146,7 @@ const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, functi
             if (order.userEmail) {
                 io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
                 // Send push notification to customer
-                yield sendPushToUser(order.userEmail, order._id.toString(), status);
+                yield sendPushToUser(order.userEmail.toLowerCase(), order._id.toString(), status);
             }
             // Also emit to admin to update their view if needed, or just broadcast
             io.emit('orderStatusUpdated', updatedOrder);

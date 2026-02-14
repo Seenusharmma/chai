@@ -24,29 +24,31 @@ router.get('/vapidPublicKey', (req, res) => {
 router.post('/subscribe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { subscription, email } = req.body;
-        console.log('Subscribe request received for:', email);
+        console.log('[Subscribe] Request received for:', email);
         if (!subscription || !email) {
-            console.log('Missing subscription or email');
+            console.log('[Subscribe] Missing subscription or email');
             return res.status(400).json({ error: 'Missing subscription or email' });
         }
-        console.log('Subscription endpoint:', subscription.endpoint);
+        const normalizedEmail = email.toLowerCase();
+        console.log('[Subscribe] Subscription endpoint:', subscription.endpoint);
+        console.log('[Subscribe] Normalized email:', normalizedEmail);
         const existingSubscription = yield PushSubscription_1.PushSubscription.findOne({
             'subscription.endpoint': subscription.endpoint,
         });
         if (existingSubscription) {
-            console.log('Subscription already exists');
+            console.log('[Subscribe] Subscription already exists');
             return res.json({ message: 'Subscription already exists' });
         }
         const newSubscription = new PushSubscription_1.PushSubscription({
-            userEmail: email,
+            userEmail: normalizedEmail,
             subscription,
         });
         yield newSubscription.save();
-        console.log('Subscription saved successfully');
+        console.log('[Subscribe] ✅ Subscription saved successfully for:', normalizedEmail);
         res.json({ message: 'Subscription saved successfully' });
     }
     catch (error) {
-        console.error('Subscription error:', error);
+        console.error('[Subscribe] Error:', error);
         res.status(500).json({ error: 'Failed to save subscription' });
     }
 }));

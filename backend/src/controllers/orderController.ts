@@ -32,13 +32,13 @@ const getAdminNotificationMessage = (order: any, isNewOrder: boolean = false) =>
 
 const sendPushToUser = async (userEmail: string, orderId: string, status: string, isAdmin: boolean = false) => {
   try {
-    console.log(`Sending push notification to: ${userEmail}, isAdmin: ${isAdmin}`);
+    console.log(`[Push] Sending to: ${userEmail}, isAdmin: ${isAdmin}`);
     
-    const subscriptions = await PushSubscription.find({ userEmail });
-    console.log('Found subscriptions:', subscriptions.length);
+    const subscriptions = await PushSubscription.find({ userEmail: userEmail.toLowerCase() });
+    console.log(`[Push] Found subscriptions for ${userEmail}:`, subscriptions.length);
     
     if (subscriptions.length === 0) {
-      console.log('No subscriptions found for user');
+      console.log(`[Push] ⚠️ No subscriptions found for ${userEmail}. User needs to enable notifications!`);
       return;
     }
     
@@ -59,25 +59,27 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
         },
       };
 
-      console.log('Sending push notification to endpoint:', sub.subscription.endpoint);
+      console.log(`[Push] Sending to endpoint: ${sub.subscription.endpoint.substring(0, 50)}...`);
       const result = await sendPushNotification(sub.subscription, payload);
       
       if (result?.error === 'expired') {
-        console.log('Subscription expired, removing...');
+        console.log('[Push] Subscription expired, removing...');
         await PushSubscription.deleteOne({ _id: sub._id });
       } else if (result?.error === 'failed') {
-        console.log('Push notification failed');
+        console.log('[Push] ❌ Push notification failed');
       } else {
-        console.log('Push notification sent successfully');
+        console.log('[Push] ✅ Push notification sent successfully');
       }
     }
   } catch (error) {
-    console.error('Push notification error:', error);
+    console.error('[Push] Error:', error);
   }
 };
 
 const sendPushToAdmin = async (order: any, isNewOrder: boolean = false) => {
-  await sendPushToUser(ADMIN_EMAIL, order._id?.toString() || order._id, order.status || 'pending', true);
+  console.log(`[Push] === Sending to ADMIN ===`);
+  console.log(`[Push] Admin email: ${ADMIN_EMAIL}`);
+  await sendPushToUser(ADMIN_EMAIL.toLowerCase(), order._id?.toString() || order._id, order.status || 'pending', true);
 };
 
 // @desc    Create new order
@@ -143,7 +145,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
         io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
         
         // Send push notification to customer
-        await sendPushToUser(order.userEmail, order._id.toString(), status);
+        await sendPushToUser(order.userEmail.toLowerCase(), order._id.toString(), status);
       }
       // Also emit to admin to update their view if needed, or just broadcast
       io.emit('orderStatusUpdated', updatedOrder); 
