@@ -15,6 +15,64 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUserOrders = exports.updateOrderStatus = exports.getOrders = exports.createOrder = void 0;
 const Order_1 = __importDefault(require("../models/Order"));
 const socket_1 = require("../utils/socket");
+const PushSubscription_1 = require("../models/PushSubscription");
+const webPush_1 = require("../utils/webPush");
+const getStatusMessage = (status) => {
+    switch (status) {
+        case 'accepted':
+            return 'Your order has been accepted!';
+        case 'processing':
+            return 'Your order is being prepared...';
+        case 'completed':
+        case 'delivered':
+            return 'Your order has been delivered!';
+        case 'declined':
+        case 'cancelled':
+            return 'Your order has been cancelled';
+        default:
+            return `Order status: ${status}`;
+    }
+};
+const sendPushToUser = (userEmail, orderId, status) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        console.log('Sending push notification to:', userEmail, 'for order:', orderId, 'status:', status);
+        const subscriptions = yield PushSubscription_1.PushSubscription.find({ userEmail });
+        console.log('Found subscriptions:', subscriptions.length);
+        if (subscriptions.length === 0) {
+            console.log('No subscriptions found for user');
+            return;
+        }
+        for (const sub of subscriptions) {
+            const payload = {
+                title: 'AuraCafe Order Update',
+                body: getStatusMessage(status),
+                icon: '/icon-192x192.png',
+                badge: '/icon-192x192.png',
+                tag: `order-${orderId}`,
+                data: {
+                    url: `/history?orderId=${orderId}`,
+                    orderId,
+                    status,
+                },
+            };
+            console.log('Sending push notification to endpoint:', sub.subscription.endpoint);
+            const result = yield (0, webPush_1.sendPushNotification)(sub.subscription, payload);
+            if ((result === null || result === void 0 ? void 0 : result.error) === 'expired') {
+                console.log('Subscription expired, removing...');
+                yield PushSubscription_1.PushSubscription.deleteOne({ _id: sub._id });
+            }
+            else if ((result === null || result === void 0 ? void 0 : result.error) === 'failed') {
+                console.log('Push notification failed');
+            }
+            else {
+                console.log('Push notification sent successfully');
+            }
+        }
+    }
+    catch (error) {
+        console.error('Push notification error:', error);
+    }
+});
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Public
@@ -65,10 +123,12 @@ const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (order) {
             order.status = status;
             const updatedOrder = yield order.save();
-            // Emit event to User
+            // Emit event to User via Socket
             const io = (0, socket_1.getIO)();
             if (order.userEmail) {
                 io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
+                // Send push notification
+                yield sendPushToUser(order.userEmail, order._id.toString(), status);
             }
             // Also emit to admin to update their view if needed, or just broadcast
             io.emit('orderStatusUpdated', updatedOrder);
