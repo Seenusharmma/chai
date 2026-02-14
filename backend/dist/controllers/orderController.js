@@ -17,6 +17,7 @@ const Order_1 = __importDefault(require("../models/Order"));
 const socket_1 = require("../utils/socket");
 const PushSubscription_1 = require("../models/PushSubscription");
 const webPush_1 = require("../utils/webPush");
+const ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'roshansharma404error@gmail.com';
 const getStatusMessage = (status) => {
     switch (status) {
         case 'accepted':
@@ -33,9 +34,15 @@ const getStatusMessage = (status) => {
             return `Order status: ${status}`;
     }
 };
-const sendPushToUser = (userEmail, orderId, status) => __awaiter(void 0, void 0, void 0, function* () {
+const getAdminNotificationMessage = (order, isNewOrder = false) => {
+    if (isNewOrder) {
+        return `New order #${order._id} - ₹${order.totalAmount}`;
+    }
+    return `Order #${order._id} status: ${order.status}`;
+};
+const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaiter(void 0, [userEmail_1, orderId_1, status_1, ...args_1], void 0, function* (userEmail, orderId, status, isAdmin = false) {
     try {
-        console.log('Sending push notification to:', userEmail, 'for order:', orderId, 'status:', status);
+        console.log(`Sending push notification to: ${userEmail}, isAdmin: ${isAdmin}`);
         const subscriptions = yield PushSubscription_1.PushSubscription.find({ userEmail });
         console.log('Found subscriptions:', subscriptions.length);
         if (subscriptions.length === 0) {
@@ -44,15 +51,18 @@ const sendPushToUser = (userEmail, orderId, status) => __awaiter(void 0, void 0,
         }
         for (const sub of subscriptions) {
             const payload = {
-                title: 'AuraCafe Order Update',
-                body: getStatusMessage(status),
+                title: isAdmin ? '🔔 New Order Alert!' : 'AuraCafe Order Update',
+                body: isAdmin
+                    ? getAdminNotificationMessage({ _id: orderId, status, totalAmount: 0 }, status === 'pending')
+                    : getStatusMessage(status),
                 icon: '/icon-192x192.png',
                 badge: '/icon-192x192.png',
                 tag: `order-${orderId}`,
                 data: {
-                    url: `/history?orderId=${orderId}`,
+                    url: isAdmin ? `/admin` : `/history?orderId=${orderId}`,
                     orderId,
                     status,
+                    isAdmin,
                 },
             };
             console.log('Sending push notification to endpoint:', sub.subscription.endpoint);
@@ -73,6 +83,10 @@ const sendPushToUser = (userEmail, orderId, status) => __awaiter(void 0, void 0,
         console.error('Push notification error:', error);
     }
 });
+const sendPushToAdmin = (order_1, ...args_1) => __awaiter(void 0, [order_1, ...args_1], void 0, function* (order, isNewOrder = false) {
+    var _a;
+    yield sendPushToUser(ADMIN_EMAIL, ((_a = order._id) === null || _a === void 0 ? void 0 : _a.toString()) || order._id, order.status || 'pending', true);
+});
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Public
@@ -89,9 +103,11 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             address,
         });
         const createdOrder = yield order.save();
-        // Emit event to Admin
+        // Emit event to Admin via Socket
         const io = (0, socket_1.getIO)();
         io.to('admin').emit('newOrder', createdOrder);
+        // Send push notification to Admin
+        yield sendPushToAdmin(createdOrder, true);
         res.status(201).json(createdOrder);
     }
     catch (error) {
@@ -127,11 +143,13 @@ const updateOrderStatus = (req, res) => __awaiter(void 0, void 0, void 0, functi
             const io = (0, socket_1.getIO)();
             if (order.userEmail) {
                 io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
-                // Send push notification
+                // Send push notification to customer
                 yield sendPushToUser(order.userEmail, order._id.toString(), status);
             }
             // Also emit to admin to update their view if needed, or just broadcast
             io.emit('orderStatusUpdated', updatedOrder);
+            // Send push notification to Admin about status change
+            yield sendPushToAdmin(updatedOrder);
             res.json(updatedOrder);
         }
         else {

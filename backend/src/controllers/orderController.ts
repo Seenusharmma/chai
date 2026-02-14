@@ -4,6 +4,8 @@ import { getIO } from '../utils/socket';
 import { PushSubscription } from '../models/PushSubscription';
 import { sendPushNotification } from '../utils/webPush';
 
+const ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'roshansharma404error@gmail.com';
+
 const getStatusMessage = (status: string) => {
   switch (status) {
     case 'accepted':
@@ -21,9 +23,16 @@ const getStatusMessage = (status: string) => {
   }
 };
 
-const sendPushToUser = async (userEmail: string, orderId: string, status: string) => {
+const getAdminNotificationMessage = (order: any, isNewOrder: boolean = false) => {
+  if (isNewOrder) {
+    return `New order #${order._id} - ₹${order.totalAmount}`;
+  }
+  return `Order #${order._id} status: ${order.status}`;
+};
+
+const sendPushToUser = async (userEmail: string, orderId: string, status: string, isAdmin: boolean = false) => {
   try {
-    console.log('Sending push notification to:', userEmail, 'for order:', orderId, 'status:', status);
+    console.log(`Sending push notification to: ${userEmail}, isAdmin: ${isAdmin}`);
     
     const subscriptions = await PushSubscription.find({ userEmail });
     console.log('Found subscriptions:', subscriptions.length);
@@ -35,15 +44,18 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
     
     for (const sub of subscriptions) {
       const payload = {
-        title: 'AuraCafe Order Update',
-        body: getStatusMessage(status),
+        title: isAdmin ? '🔔 New Order Alert!' : 'AuraCafe Order Update',
+        body: isAdmin 
+          ? getAdminNotificationMessage({ _id: orderId, status, totalAmount: 0 }, status === 'pending')
+          : getStatusMessage(status),
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
         tag: `order-${orderId}`,
         data: {
-          url: `/history?orderId=${orderId}`,
+          url: isAdmin ? `/admin` : `/history?orderId=${orderId}`,
           orderId,
           status,
+          isAdmin,
         },
       };
 
@@ -62,6 +74,10 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
   } catch (error) {
     console.error('Push notification error:', error);
   }
+};
+
+const sendPushToAdmin = async (order: any, isNewOrder: boolean = false) => {
+  await sendPushToUser(ADMIN_EMAIL, order._id?.toString() || order._id, order.status || 'pending', true);
 };
 
 // @desc    Create new order
@@ -83,9 +99,12 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const createdOrder = await order.save();
 
-    // Emit event to Admin
+    // Emit event to Admin via Socket
     const io = getIO();
     io.to('admin').emit('newOrder', createdOrder);
+
+    // Send push notification to Admin
+    await sendPushToAdmin(createdOrder, true);
 
     res.status(201).json(createdOrder);
   } catch (error: any) {
@@ -123,11 +142,14 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       if (order.userEmail) {
         io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
         
-        // Send push notification
+        // Send push notification to customer
         await sendPushToUser(order.userEmail, order._id.toString(), status);
       }
       // Also emit to admin to update their view if needed, or just broadcast
       io.emit('orderStatusUpdated', updatedOrder); 
+
+      // Send push notification to Admin about status change
+      await sendPushToAdmin(updatedOrder);
 
       res.json(updatedOrder);
     } else {
