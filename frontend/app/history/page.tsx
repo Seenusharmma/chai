@@ -229,16 +229,16 @@ export default function HistoryPage() {
                             <span className="text-[#A89B8F]">Subtotal</span>
                             <span className="text-white">₹{order.subtotal?.toFixed(2) || order.total.toFixed(2)}</span>
                           </div>
-                          {order.discount > 0 && (
+                          {(order.discount ?? 0) > 0 && (
                             <div className="flex items-center justify-between mt-1">
                               <span className="text-[#A89B8F]">Discount</span>
-                              <span className="text-green-400">-₹{order.discount.toFixed(2)}</span>
+                              <span className="text-green-400">-₹{(order.discount ?? 0).toFixed(2)}</span>
                             </div>
                           )}
-                          {order.deliveryFee > 0 && (
+                          {(order.deliveryFee ?? 0) > 0 && (
                             <div className="flex items-center justify-between mt-1">
                               <span className="text-[#A89B8F]">Delivery</span>
-                              <span className="text-white">₹{order.deliveryFee.toFixed(2)}</span>
+                              <span className="text-white">₹{(order.deliveryFee ?? 0).toFixed(2)}</span>
                             </div>
                           )}
                           <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">

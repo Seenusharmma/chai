@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
-import { PushSubscription } from '@/lib/types/push';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export function usePushNotifications() {
   const { user } = useUser();
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [subscription, setSubscription] = useState<any>(null);
   const [vapidPublicKey, setVapidPublicKey] = useState<string>('');
   const [isSupported, setIsSupported] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
@@ -37,23 +36,23 @@ export function usePushNotifications() {
       const publicKey = vapidPublicKey || await getVapidKey();
       if (!publicKey) throw new Error('No VAPID public key');
 
-      // Use the push service worker for subscription
       const registration = await navigator.serviceWorker.ready;
-      const pushSW = await navigator.serviceWorker.getRegistration('/push-sw.js');
       
-      const sub = await (pushSW || registration).pushManager.subscribe({
+      const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
 
+      const subJson = sub.toJSON();
+
       await axios.post(`${API_URL}/subscriptions/subscribe`, {
-        subscription: sub,
+        subscription: subJson,
         email: user.primaryEmailAddress.emailAddress,
       });
 
-      setSubscription(sub);
+      setSubscription(subJson);
       setPermissionStatus('granted');
-      return sub;
+      return subJson;
     } catch (error) {
       console.error('Failed to subscribe:', error);
       return null;
@@ -71,7 +70,12 @@ export function usePushNotifications() {
         },
       });
 
-      await subscription.unsubscribe();
+      const registration = await navigator.serviceWorker.ready;
+      const sub = await registration.pushManager.getSubscription();
+      if (sub) {
+        await sub.unsubscribe();
+      }
+      
       setSubscription(null);
       setPermissionStatus('default');
     } catch (error) {
@@ -106,7 +110,7 @@ export function usePushNotifications() {
   };
 }
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
@@ -114,5 +118,5 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
   }
-  return outputArray;
+  return outputArray.buffer;
 }

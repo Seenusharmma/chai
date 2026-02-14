@@ -13,6 +13,8 @@ export interface HistoryOrder {
   date: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   createdAt: string;
+  discount?: number;
+  deliveryFee?: number;
 }
 
 export function useHistory() {
@@ -44,8 +46,10 @@ export function useHistory() {
              quantity: i.quantity
           })),
           total: o.totalAmount,
-          subtotal: o.totalAmount / 1.1,
-          tax: o.totalAmount - (o.totalAmount / 1.1),
+          subtotal: o.subtotal || o.totalAmount / 1.1,
+          tax: o.tax || o.totalAmount - (o.totalAmount / 1.1),
+          discount: o.discount || 0,
+          deliveryFee: o.deliveryFee || 0,
           createdAt: o.createdAt,
           status: o.status
         }));
