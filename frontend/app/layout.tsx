@@ -21,21 +21,21 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
 
-  title: "BarsCafe - Fresh Coffee & Delicious Food",
-  description: "Experience premium coffee, artisanal pastries, and delicious food at BarsCafe. Order online for pickup or delivery.",
-  keywords: ["coffee shop", "cafe", "coffee", "pastries", "breakfast", "lunch", "food delivery"],
-  authors: [{ name: "BarsCafe" }],
+  title: "OriBon Cafe & Restro - Premium Coffee & Delicious Food",
+  description: "Experience premium coffee, artisanal pastries, and delicious food at OriBon Cafe & Restro. Order online for pickup or delivery.",
+  keywords: ["coffee shop", "cafe", "restaurant", "coffee", "pastries", "breakfast", "lunch", "dinner", "food delivery", "OriBon"],
+  authors: [{ name: "OriBon Cafe & Restro" }],
   openGraph: {
-    title: "BarsCafe - Fresh Coffee & Delicious Food",
-    description: "Experience premium coffee, artisanal pastries, and delicious food at BarsCafe.",
+    title: "OriBon Cafe & Restro - Premium Coffee & Delicious Food",
+    description: "Experience premium coffee, artisanal pastries, and delicious food at OriBon Cafe & Restro.",
     type: "website",
     locale: "en_US",
-    siteName: "BarsCafe",
+    siteName: "OriBon Cafe & Restro",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BarsCafe - Fresh Coffee & Delicious Food",
-    description: "Experience premium coffee, artisanal pastries, and delicious food at BarsCafe.",
+    title: "OriBon Cafe & Restro - Premium Coffee & Delicious Food",
+    description: "Experience premium coffee, artisanal pastries, and delicious food at OriBon Cafe & Restro.",
   },
 };
 

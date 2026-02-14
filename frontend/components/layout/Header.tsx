@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { ShoppingBag, Search, User, Shield, Phone } from 'lucide-react';
@@ -30,10 +31,14 @@ export function Header() {
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#D4A574] to-[#8B6F47] flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">A</span>
-                        </div>
-                        <span className="text-xl font-bold text-white tracking-wide">Aura<span className="text-[#D4A574]">Café</span></span>
+                        <Image
+                            src="/logo.png"
+                            alt="OriBon Cafe & Restro Logo"
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                        />
+                        <span className="text-xl font-bold text-white tracking-wide">OriBon <span className="text-[#D4A574]">Cafe</span></span>
                     </Link>
 
                     {/* Desktop Navigation */}

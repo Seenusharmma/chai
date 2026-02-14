@@ -1,12 +1,25 @@
-import { MenuItem, CategoryInfo } from '../types';
+import { MenuItem, CategoryInfo, Category } from '../types';
 
 export const categories: CategoryInfo[] = [
-  { id: 'coffee', name: 'Coffee', icon: 'Coffee' },
-  { id: 'tea', name: 'Tea', icon: 'Cup' },
-  { id: 'pastry', name: 'Pastry', icon: 'Croissant' },
+  { id: 'biriyani', name: 'Biriyani', icon: 'Rice' },
+  { id: 'chicken', name: 'Chicken', icon: 'Drumstick' },
+  { id: 'mutton', name: 'Mutton', icon: 'Drumstick' },
+  { id: 'egg', name: 'Egg', icon: 'Egg' },
+  { id: 'veg', name: 'Veg', icon: 'Carrot' },
+  { id: 'rice', name: 'Rice', icon: 'Rice' },
+  { id: 'roti', name: 'Roti', icon: 'Circle' },
+  { id: 'roll', name: 'Roll', icon: 'Wrap' },
+  { id: 'soup', name: 'Soup', icon: 'Soup' },
+  { id: 'noodles', name: 'Noodles', icon: 'Noodles' },
+  { id: 'bread', name: 'Bread', icon: 'Bread' },
   { id: 'sandwich', name: 'Sandwich', icon: 'Sandwich' },
-  { id: 'dessert', name: 'Dessert', icon: 'IceCream' },
-  { id: 'breakfast', name: 'Breakfast', icon: 'Egg' },
+  { id: 'burger', name: 'Burger', icon: 'Burger' },
+  { id: 'momo', name: 'Momo', icon: 'Dumpling' },
+  { id: 'salad', name: 'Salad', icon: 'Salad' },
+  { id: 'tea', name: 'Tea', icon: 'Cup' },
+  { id: 'coffee', name: 'Coffee', icon: 'Coffee' },
+  { id: 'mocktails', name: 'Mocktails', icon: 'Glass' },
+  { id: 'maggie', name: 'Maggie', icon: 'Noodles' },
 ];
 
 export const menuItems: MenuItem[] = [
@@ -58,7 +71,7 @@ export const menuItems: MenuItem[] = [
     description: 'Buttery, flaky French croissant',
     price: 3.75,
     image: '/images/croissant.jpg',
-    category: 'pastry',
+    category: 'bread',
     rating: 4.8,
     isPopular: true,
   },
@@ -68,7 +81,7 @@ export const menuItems: MenuItem[] = [
     description: 'Rich chocolate muffin with chocolate chips',
     price: 4.25,
     image: '/images/muffin.jpg',
-    category: 'pastry',
+    category: 'bread',
     rating: 4.7,
   },
   {
@@ -77,7 +90,7 @@ export const menuItems: MenuItem[] = [
     description: 'Fresh avocado on artisan bread',
     price: 7.50,
     image: '/images/avocado-toast.jpg',
-    category: 'breakfast',
+    category: 'bread',
     rating: 4.9,
   },
   {
@@ -95,7 +108,7 @@ export const menuItems: MenuItem[] = [
     description: 'Healthy green smoothie bowl',
     price: 6.50,
     image: '/images/green-bowl.jpg',
-    category: 'breakfast',
+    category: 'salad',
     rating: 4.5,
   },
   {
@@ -122,7 +135,7 @@ export const menuItems: MenuItem[] = [
     description: 'Creamy New York style cheesecake',
     price: 5.75,
     image: '/images/cheesecake.jpg',
-    category: 'dessert',
+    category: 'bread',
     rating: 4.9,
   },
 ];

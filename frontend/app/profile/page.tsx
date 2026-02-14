@@ -149,9 +149,8 @@ export default function ProfilePage() {
           {menuItems.map((item, index) => (
             <button
               key={item.label}
-              className={`w-full flex items-center justify-between p-4 md:p-5 hover:bg-[#352D28] transition-colors ${
-                index !== menuItems.length - 1 ? 'border-b border-white/5' : ''
-              }`}
+              className={`w-full flex items-center justify-between p-4 md:p-5 hover:bg-[#352D28] transition-colors ${index !== menuItems.length - 1 ? 'border-b border-white/5' : ''
+                }`}
             >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
@@ -212,7 +211,7 @@ export default function ProfilePage() {
             Add Credits
           </button>
 
-          <button 
+          <button
             onClick={() => signOut()}
             className="w-full flex items-center justify-center gap-3 p-4 md:p-5 bg-red-500/10 rounded-2xl border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-colors"
           >
@@ -222,7 +221,7 @@ export default function ProfilePage() {
         </motion.div>
 
         <p className="text-center text-[#6B6560] text-xs mt-8 pb-4">
-          Version 1.0.0 • AuraCafé
+          Version 1.0.0 • OriBon Cafe
         </p>
       </div>
       <Navigation />

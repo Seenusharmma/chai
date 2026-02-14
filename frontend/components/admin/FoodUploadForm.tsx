@@ -1,9 +1,38 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
-import imageCompression from 'browser-image-compression';
+import { useState, useRef, useCallback } from 'react';
+import { X, Image as ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+import { compressImage } from '@/lib/utils/imageCompression';
 import { Category, Size } from '@/lib/types';
+
+const categories: Category[] = [
+  'biriyani', 'chicken', 'mutton', 'egg', 'veg', 'rice', 'roti', 'roll',
+  'soup', 'noodles', 'bread', 'sandwich', 'burger', 'momo', 'salad',
+  'tea', 'coffee', 'mocktails', 'maggie'
+];
+
+const categoryLabels: Record<Category, string> = {
+  biriyani: 'Biriyani',
+  chicken: 'Chicken',
+  mutton: 'Mutton',
+  egg: 'Egg',
+  veg: 'Veg',
+  rice: 'Rice',
+  roti: 'Roti',
+  roll: 'Roll',
+  soup: 'Soup',
+  noodles: 'Noodles',
+  bread: 'Bread',
+  sandwich: 'Sandwich',
+  burger: 'Burger',
+  momo: 'Momo',
+  salad: 'Salad',
+  tea: 'Tea',
+  coffee: 'Coffee',
+  mocktails: 'Mocktails',
+  maggie: 'Maggie',
+};
 
 interface FoodUploadFormProps {
   isOpen: boolean;
@@ -11,17 +40,16 @@ interface FoodUploadFormProps {
   onSuccess: () => void;
 }
 
-const categories: Category[] = ['coffee', 'tea', 'pastry', 'sandwich', 'dessert', 'breakfast'];
-
 export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormProps) {
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    category: 'coffee' as Category,
+    category: 'biriyani' as Category,
     isPopular: false,
     isFeatured: false,
     isVeg: true,
@@ -33,16 +61,44 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
   ]);
   const [hasSizes, setHasSizes] = useState(false);
 
+  const processFile = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
     }
   };
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      processFile(file);
+      if (fileInputRef.current) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInputRef.current.files = dataTransfer.files;
+      }
+    }
+  }, [processFile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,17 +113,12 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
 
       const file = fileInputRef.current?.files?.[0];
       if (file) {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-        };
         try {
-          const compressedFile = await imageCompression(file, options);
+          const compressedFile = await compressImage(file);
           data.append('image', compressedFile);
         } catch (error) {
           console.error('Error compressing image:', error);
-          data.append('image', file); // Fallback to original
+          data.append('image', file);
         }
       }
 
@@ -96,7 +147,7 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
       name: '',
       description: '',
       price: '',
-      category: 'coffee',
+      category: 'biriyani',
       isPopular: false,
       isFeatured: false,
       isVeg: true,
@@ -178,7 +229,7 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat} className="bg-[#1A1410]">
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    {categoryLabels[cat]}
                   </option>
                 ))}
               </select>
@@ -187,22 +238,39 @@ export function FoodUploadForm({ isOpen, onClose, onSuccess }: FoodUploadFormPro
 
           <div>
             <label className="block text-xs text-[#A89B8F] mb-1.5">Image</label>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center justify-center w-16 h-16 bg-[#1A1410] border border-white/10 rounded-lg cursor-pointer hover:border-[#D4A574] transition-colors overflow-hidden">
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                ) : (
-                  <Upload className="w-5 h-5 text-[#A89B8F]" />
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-              </label>
-              <span className="text-[10px] text-[#A89B8F]">Click to upload image</span>
+            <div
+              className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+                isDragging 
+                  ? 'border-[#D4A574] bg-[#D4A574]/10' 
+                  : 'border-white/10 hover:border-[#D4A574]'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="flex items-center gap-3">
+                <label className="flex items-center justify-center w-20 h-20 bg-[#1A1410] border border-white/10 rounded-lg cursor-pointer hover:border-[#D4A574] transition-colors overflow-hidden flex-shrink-0">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Food preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-1">
+                      <ImageIcon className="w-6 h-6 text-[#A89B8F]" />
+                      <span className="text-[10px] text-[#A89B8F]">Add</span>
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-[#A89B8F]">Click or drag & drop image</span>
+                  <span className="text-[10px] text-[#A89B8F]/60">PNG, JPG up to 5MB</span>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -35,7 +35,7 @@ self.addEventListener('push', function(event: PushEvent) {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'AuraCafe', options)
+    self.registration.showNotification(data.title || 'OriBon Cafe & Restro', options)
   );
 });
 

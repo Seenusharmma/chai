@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit2, Trash2, TrendingUp, Menu, X, Coffee, ShoppingCart, Clock, CheckCircle, Check, Users, History, Archive, DollarSign, Receipt } from 'lucide-react';
 import Image from 'next/image';
@@ -14,15 +15,25 @@ import { AdminUsers } from '@/components/admin/AdminUsers';
 import { useUserRole } from '@/lib/request/UserContext';
 
 export default function AdminDashboard() {
+    const router = useRouter();
     const { items, refetch } = useMenu();
     const { orders, updateOrderStatus, declineAndDeleteOrder, deleteOrder, pendingOrders } = useAdminOrders();
-    const { isSuperAdmin } = useUserRole();
+    const { isSuperAdmin, isAdmin, isLoading } = useUserRole();
     const [activeTab, setActiveTab] = useState<'items' | 'orders' | 'users' | 'history' | 'account'>('orders');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
     const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isLoading && !isSuperAdmin && activeTab === 'users') {
+            setActiveTab('orders');
+        }
+        if (!isLoading && !isAdmin) {
+            router.push('/');
+        }
+    }, [isLoading, isSuperAdmin, isAdmin, activeTab, router]);
 
     const completedOrders = orders.filter(o => o.status === 'completed');
     const totalRevenue = completedOrders.reduce((sum, o) => sum + o.total, 0);

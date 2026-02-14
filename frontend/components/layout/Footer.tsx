@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export function Footer() {
     return (
         <footer className="bg-[#15100D] text-[#A89B8F] py-8 pb-28 md:pb-8 md:py-12 lg:py-16">
@@ -5,10 +7,14 @@ export function Footer() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-12">
                     <div className="col-span-2 md:col-span-1">
                         <div className="flex items-center gap-2 mb-3 md:mb-4">
-                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#D4A574] to-[#8B6F47] flex items-center justify-center">
-                                <span className="text-white font-bold text-xs md:text-sm">A</span>
-                            </div>
-                            <span className="text-base md:text-lg lg:text-xl font-bold text-white">Aura<span className="text-[#D4A574]">Café</span></span>
+                            <Image
+                                src="/logo.png"
+                                alt="OriBon Cafe & Restro Logo"
+                                width={40}
+                                height={40}
+                                className="rounded-full"
+                            />
+                            <span className="text-base md:text-lg lg:text-xl font-bold text-white">OriBon <span className="text-[#D4A574]">Cafe & Restro</span></span>
                         </div>
                         <p className="text-xs md:text-sm lg:text-base leading-relaxed max-w-xs">
                             Premium coffee & treats.
@@ -49,7 +55,7 @@ export function Footer() {
                 </div>
 
                 <div className="mt-6 md:mt-8 lg:mt-12 pt-4 md:pt-4 border-t border-white/5 text-center text-xs md:text-sm">
-                    <p>&copy; {new Date().getFullYear()} AuraCafé. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} OriBon Cafe & Restro. All rights reserved.</p>
                 </div>
             </div>
         </footer>

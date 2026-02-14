@@ -1,9 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { X, Upload, Loader2, Image } from 'lucide-react';
 import axios from 'axios';
+import { compressImage } from '@/lib/utils/imageCompression';
+import { Category } from '@/lib/types';
+
+const categories: Category[] = [
+  'biriyani', 'chicken', 'mutton', 'egg', 'veg', 'rice', 'roti', 'roll',
+  'soup', 'noodles', 'bread', 'sandwich', 'burger', 'momo', 'salad',
+  'tea', 'coffee', 'mocktails', 'maggie'
+];
+
+const categoryLabels: Record<Category, string> = {
+  biriyani: 'Biriyani',
+  chicken: 'Chicken',
+  mutton: 'Mutton',
+  egg: 'Egg',
+  veg: 'Veg',
+  rice: 'Rice',
+  roti: 'Roti',
+  roll: 'Roll',
+  soup: 'Soup',
+  noodles: 'Noodles',
+  bread: 'Bread',
+  sandwich: 'Sandwich',
+  burger: 'Burger',
+  momo: 'Momo',
+  salad: 'Salad',
+  tea: 'Tea',
+  coffee: 'Coffee',
+  mocktails: 'Mocktails',
+  maggie: 'Maggie',
+};
 
 interface FoodEditFormProps {
     isOpen: boolean;
@@ -17,9 +47,51 @@ export function FoodEditForm({ isOpen, onClose, onSuccess, item }: FoodEditFormP
         name: item.name || '',
         description: item.description || '',
         price: item.price || '',
-        category: item.category || 'coffee',
+        category: item.category || 'biriyani',
     });
     const [loading, setLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string>(item.image || '');
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const processFile = useCallback((file: File) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    }, []);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            processFile(file);
+        }
+    };
+
+    const handleDragOver = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    }, []);
+
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            processFile(file);
+            if (fileInputRef.current) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInputRef.current.files = dataTransfer.files;
+            }
+        }
+    }, [processFile]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,7 +99,23 @@ export function FoodEditForm({ isOpen, onClose, onSuccess, item }: FoodEditFormP
 
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-            await axios.put(`${API_URL}/menu/${item.id}`, formData);
+            
+            const file = fileInputRef.current?.files?.[0];
+            if (file) {
+                const formDataWithImage = new FormData();
+                formDataWithImage.append('data', JSON.stringify({
+                    ...formData,
+                    price: Number(formData.price),
+                }));
+                
+                const compressedFile = await compressImage(file);
+                formDataWithImage.append('image', compressedFile);
+                
+                await axios.put(`${API_URL}/menu/${item.id}`, formDataWithImage);
+            } else {
+                await axios.put(`${API_URL}/menu/${item.id}`, formData);
+            }
+            
             onSuccess();
         } catch (error) {
             console.error('Error updating item:', error);
@@ -113,13 +201,52 @@ export function FoodEditForm({ isOpen, onClose, onSuccess, item }: FoodEditFormP
                                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-[#1A1410] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#D4A574]"
                                 >
-                                    <option value="coffee">Coffee</option>
-                                    <option value="tea">Tea</option>
-                                    <option value="pastry">Pastry</option>
-                                    <option value="breakfast">Breakfast</option>
-                                    <option value="sandwich">Sandwich</option>
-                                    <option value="dessert">Dessert</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat} value={cat} className="bg-[#1A1410]">
+                                            {categoryLabels[cat]}
+                                        </option>
+                                    ))}
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-white mb-2">
+                                    Image
+                                </label>
+                                <div
+                                    className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+                                        isDragging 
+                                            ? 'border-[#D4A574] bg-[#D4A574]/10' 
+                                            : 'border-white/10 hover:border-[#D4A574]'
+                                    }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <label className="flex items-center justify-center w-20 h-20 bg-[#1A1410] border border-white/10 rounded-lg cursor-pointer hover:border-[#D4A574] transition-colors overflow-hidden flex-shrink-0">
+                                            {imagePreview ? (
+                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <Image className="w-6 h-6 text-[#A89B8F]" />
+                                                    <span className="text-[10px] text-[#A89B8F]">Add</span>
+                                                </div>
+                                            )}
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs text-[#A89B8F]">Click or drag & drop image</span>
+                                            <span className="text-[10px] text-[#A89B8F]/60">PNG, JPG up to 5MB</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex gap-3 pt-4">

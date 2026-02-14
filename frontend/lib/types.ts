@@ -18,12 +18,25 @@ export interface Size {
 }
 
 export type Category = 
-  | 'coffee' 
-  | 'tea' 
-  | 'pastry' 
-  | 'sandwich' 
-  | 'dessert' 
-  | 'breakfast';
+  | 'biriyani' 
+  | 'chicken' 
+  | 'mutton' 
+  | 'egg' 
+  | 'veg' 
+  | 'rice' 
+  | 'roti'
+  | 'roll'
+  | 'soup'
+  | 'noodles'
+  | 'bread'
+  | 'sandwich'
+  | 'burger'
+  | 'momo'
+  | 'salad'
+  | 'tea'
+  | 'coffee'
+  | 'mocktails'
+  | 'maggie';
 
 export interface CartItem extends MenuItem {
   quantity: number;
