@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserOrders = exports.updateOrderStatus = exports.getOrders = exports.createOrder = void 0;
+exports.deleteOrder = exports.getUserOrders = exports.updateOrderStatus = exports.getOrders = exports.createOrder = void 0;
 const Order_1 = __importDefault(require("../models/Order"));
 const socket_1 = require("../utils/socket");
 const PushSubscription_1 = require("../models/PushSubscription");
@@ -176,3 +176,26 @@ const getUserOrders = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.getUserOrders = getUserOrders;
+// @desc    Delete order
+// @route   DELETE /api/orders/:id
+// @access  Private (Admin)
+const deleteOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const order = yield Order_1.default.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        // Send push notification to customer about order cancellation
+        if (order.userEmail) {
+            yield sendPushToUser(order.userEmail.toLowerCase(), order._id.toString(), 'cancelled');
+        }
+        yield order.deleteOne();
+        console.log(`[Delete] Order ${req.params.id} deleted successfully`);
+        res.json({ message: 'Order deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+exports.deleteOrder = deleteOrder;

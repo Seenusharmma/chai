@@ -11,4 +11,5 @@ router.route('/')
     .get(orderController_1.getOrders);
 router.route('/:id/status').put(orderController_1.updateOrderStatus);
 router.route('/history/:email').get(orderController_1.getUserOrders);
+router.route('/:id').delete(orderController_1.deleteOrder);
 exports.default = router;

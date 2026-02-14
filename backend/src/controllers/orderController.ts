@@ -173,3 +173,29 @@ export const getUserOrders = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+// @desc    Delete order
+// @route   DELETE /api/orders/:id
+// @access  Private (Admin)
+export const deleteOrder = async (req: Request, res: Response) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Send push notification to customer about order cancellation
+    if (order.userEmail) {
+      await sendPushToUser(order.userEmail.toLowerCase(), order._id.toString(), 'cancelled');
+    }
+
+    await order.deleteOne();
+    
+    console.log(`[Delete] Order ${req.params.id} deleted successfully`);
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};

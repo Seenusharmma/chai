@@ -15,13 +15,14 @@ import { useUserRole } from '@/lib/request/UserContext';
 
 export default function AdminDashboard() {
     const { items, refetch } = useMenu();
-    const { orders, updateOrderStatus, pendingOrders } = useAdminOrders();
+    const { orders, updateOrderStatus, deleteOrder, pendingOrders } = useAdminOrders();
     const { isSuperAdmin } = useUserRole();
     const [activeTab, setActiveTab] = useState<'items' | 'orders' | 'users' | 'history' | 'account'>('orders');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+    const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
 
     const completedOrders = orders.filter(o => o.status === 'completed');
     const totalRevenue = completedOrders.reduce((sum, o) => sum + o.total, 0);
@@ -265,13 +266,21 @@ export default function AdminDashboard() {
                                                     )}
 
                                                     {order.status === 'accepted' && (
-                                                        <button
-                                                            onClick={() => updateOrderStatus(order.id, 'completed')}
-                                                            className="flex items-center gap-1 px-2 py-1.5 bg-[#D4A574] text-[#1A1410] text-[10px] font-bold rounded hover:bg-[#C49564] transition-colors"
-                                                        >
-                                                            <Archive className="w-3 h-3" />
-                                                            Save to History
-                                                        </button>
+                                                        <div className="flex items-center gap-1">
+                                                            <button
+                                                                onClick={() => updateOrderStatus(order.id, 'completed')}
+                                                                className="flex items-center gap-1 px-2 py-1.5 bg-[#D4A574] text-[#1A1410] text-[10px] font-bold rounded hover:bg-[#C49564] transition-colors"
+                                                            >
+                                                                <Archive className="w-3 h-3" />
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeletingOrderId(order.id)}
+                                                                className="flex items-center gap-1 px-2 py-1.5 bg-red-500/20 text-red-400 text-[10px] font-medium rounded hover:bg-red-500/30 transition-colors"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
@@ -522,6 +531,54 @@ export default function AdminDashboard() {
                                     </button>
                                     <button
                                         onClick={() => handleDeleteItem(deletingItemId)}
+                                        className="flex-1 py-2.5 px-4 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Order Confirmation Modal */}
+            <AnimatePresence>
+                {deletingOrderId && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setDeletingOrderId(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-[#2D2520] rounded-2xl p-6 max-w-sm w-full border border-white/10"
+                        >
+                            <div className="text-center">
+                                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                                    <Trash2 className="w-6 h-6 text-red-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Delete Order?</h3>
+                                <p className="text-sm text-[#A89B8F] mb-6">
+                                    This will permanently delete this order. The customer will be notified about the cancellation.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setDeletingOrderId(null)}
+                                        className="flex-1 py-2.5 px-4 bg-[#1A1410] text-white rounded-lg font-medium hover:bg-[#252019] transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            deleteOrder(deletingOrderId);
+                                            setDeletingOrderId(null);
+                                        }}
                                         className="flex-1 py-2.5 px-4 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
                                     >
                                         Delete
