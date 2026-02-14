@@ -105,6 +105,9 @@ export function AdminUsers() {
         }
     };
 
+// Filter to show only admins (not regular users)
+    const adminUsers = users.filter(user => user.role === 'admin' || user.role === 'super-admin');
+
     if (loading) {
         return (
             <div className="flex justify-center py-8">
@@ -115,6 +118,13 @@ export function AdminUsers() {
 
     return (
         <div className="space-y-4">
+            {adminUsers.length === 0 && (
+                <div className="text-center py-8">
+                    <Shield className="w-12 h-12 text-[#A89B8F] mx-auto mb-3" />
+                    <h3 className="text-white font-semibold mb-1">No Admins Yet</h3>
+                    <p className="text-xs text-[#A89B8F]">Promote users to admin using the form above</p>
+                </div>
+            )}
             {/* Promote by Email Form */}
             {isSuperAdmin && (
                 <div className="bg-[#2D2520] p-4 rounded-xl border border-white/5">
@@ -164,9 +174,9 @@ export function AdminUsers() {
                     </form>
                 </div>
             )}
-            {/* Mobile View */}
+{/* Mobile View */}
             <div className="md:hidden space-y-3">
-                {users.map((user) => (
+                {adminUsers.map((user) => (
                     <div key={user._id} className="bg-[#2D2520] p-4 rounded-xl border border-white/5 space-y-3">
                         <div className="flex justify-between items-start">
                             <div>
@@ -226,8 +236,8 @@ export function AdminUsers() {
                             <th className="px-4 py-3 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {users.map((user) => (
+<tbody className="divide-y divide-white/5">
+                        {adminUsers.map((user) => (
                             <tr key={user._id} className="hover:bg-white/5 transition-colors">
                                 <td className="px-4 py-3">
                                     <div>

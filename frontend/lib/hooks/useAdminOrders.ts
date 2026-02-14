@@ -126,6 +126,10 @@ export function useAdminOrders() {
     updateOrderMutation.mutate({ orderId, status });
   };
 
+  const declineAndDeleteOrder = (orderId: string) => {
+    deleteOrderMutation.mutate(orderId);
+  };
+
   const deleteOrder = (orderId: string) => {
     deleteOrderMutation.mutate(orderId);
   };
@@ -136,6 +140,7 @@ export function useAdminOrders() {
   return {
     orders,
     updateOrderStatus,
+    declineAndDeleteOrder,
     deleteOrder,
     addOrder: () => { console.warn('addOrder is deprecated'); },
     pendingOrders,

@@ -15,7 +15,7 @@ import { useUserRole } from '@/lib/request/UserContext';
 
 export default function AdminDashboard() {
     const { items, refetch } = useMenu();
-    const { orders, updateOrderStatus, deleteOrder, pendingOrders } = useAdminOrders();
+    const { orders, updateOrderStatus, declineAndDeleteOrder, deleteOrder, pendingOrders } = useAdminOrders();
     const { isSuperAdmin } = useUserRole();
     const [activeTab, setActiveTab] = useState<'items' | 'orders' | 'users' | 'history' | 'account'>('orders');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
                                                                 <Check className="w-3 h-3" />
                                                             </button>
                                                             <button
-                                                                onClick={() => updateOrderStatus(order.id, 'declined')}
+                                                                onClick={() => declineAndDeleteOrder(order.id)}
                                                                 className="flex items-center gap-1 px-2 py-1.5 bg-red-500 text-white text-[10px] font-medium rounded"
                                                             >
                                                                 <X className="w-3 h-3" />
