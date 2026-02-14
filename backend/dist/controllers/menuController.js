@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMenuItem = exports.updateMenuItem = exports.createMenuItem = exports.seedMenu = exports.getMenu = void 0;
+exports.deleteMenuItem = exports.updateMenuItem = exports.createMenuItem = exports.seedMenu = exports.getCategories = exports.getMenu = void 0;
 const MenuItem_1 = __importDefault(require("../models/MenuItem"));
 // @desc    Get all menu items
 // @route   GET /api/menu
@@ -29,6 +29,23 @@ const getMenu = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getMenu = getMenu;
+// @desc    Get all unique categories
+// @route   GET /api/menu/categories
+// @access  Public
+const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const categories = yield MenuItem_1.default.distinct('category');
+        const categoryList = categories.map(cat => ({
+            id: cat,
+            name: cat.charAt(0).toUpperCase() + cat.slice(1)
+        }));
+        res.json(categoryList);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+});
+exports.getCategories = getCategories;
 // @desc    Seed menu items
 // @route   POST /api/menu/seed
 // @access  Public (should be protected in prod)

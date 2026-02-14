@@ -26,11 +26,10 @@ export function MenuItem({ item }: MenuItemProps) {
 
                 {/* Veg/Non-Veg Badge */}
                 <div className="absolute top-3 left-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        item.isVeg 
-                            ? 'bg-green-500/90' 
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${item.isVeg
+                            ? 'bg-green-500/90'
                             : 'bg-red-500/90'
-                    }`}>
+                        }`}>
                         <CircleDot className="w-3 h-3 text-white" />
                     </div>
                 </div>

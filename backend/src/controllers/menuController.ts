@@ -36,6 +36,22 @@ export const getMenu = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Get all unique categories
+// @route   GET /api/menu/categories
+// @access  Public
+export const getCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await MenuItem.distinct('category');
+    const categoryList = categories.map(cat => ({
+      id: cat,
+      name: cat.charAt(0).toUpperCase() + cat.slice(1)
+    }));
+    res.json(categoryList);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
 // @desc    Seed menu items
 // @route   POST /api/menu/seed
 // @access  Public (should be protected in prod)

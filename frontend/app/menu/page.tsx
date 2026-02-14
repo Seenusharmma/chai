@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronLeft, CircleDot } from 'lucide-react';
+import { Search, ChevronLeft, CircleDot, Leaf } from 'lucide-react';
 import { useMenu } from '@/lib/hooks/useMenu';
 import { useCategories } from '@/lib/hooks/useCategories';
 import { Category } from '@/lib/types';
@@ -11,16 +11,26 @@ import { cn } from '@/lib/utils/cn';
 import { Header } from '@/components/layout/Header';
 import { MenuItem } from '@/components/menu/MenuItem';
 
+type FoodType = 'all' | 'veg' | 'nonveg';
+
 export default function MenuPage() {
     const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [foodType, setFoodType] = useState<FoodType>('all');
     const router = useRouter();
 
     const { items, isLoading } = useMenu(
         activeCategory === 'all' ? undefined : activeCategory,
         searchQuery
     );
+
+    const filteredItems = useMemo(() => {
+        if (foodType === 'all') return items;
+        return items.filter(item => 
+            foodType === 'veg' ? item.isVeg : !item.isVeg
+        );
+    }, [items, foodType]);
 
     const { categories: backendCategories, isLoading: categoriesLoading } = useCategories();
 
@@ -100,6 +110,63 @@ export default function MenuPage() {
                                     className="w-full bg-[#2D2520] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-[#6B6560] focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 transition-all"
                                 />
                             </div>
+
+                            {/* Veg/Non-Veg Toggle */}
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="flex items-center gap-3 mt-5"
+                            >
+                                <div className="flex bg-[#1A1410] rounded-lg p-1 border border-white/10">
+                                    {/* All Button */}
+                                    <button
+                                        onClick={() => setFoodType('all')}
+                                        className={cn(
+                                            "px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200",
+                                            foodType === 'all'
+                                                ? "bg-[#D4A574] text-[#1A1410] shadow-md"
+                                                : "text-[#A89B8F] hover:text-white hover:bg-white/5"
+                                        )}
+                                    >
+                                        ALL
+                                    </button>
+                                    
+                                    {/* Veg Button */}
+                                    <button
+                                        onClick={() => setFoodType('veg')}
+                                        className={cn(
+                                            "px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                            foodType === 'veg'
+                                                ? "bg-green-500 text-white shadow-md"
+                                                : "text-[#A89B8F] hover:text-green-400 hover:bg-green-500/10"
+                                        )}
+                                    >
+                                        <span className={cn(
+                                            "w-2 h-2 rounded-full",
+                                            foodType === 'veg' ? "bg-white" : "bg-green-500"
+                                        )}></span>
+                                        VEG
+                                    </button>
+                                    
+                                    {/* Non-Veg Button */}
+                                    <button
+                                        onClick={() => setFoodType('nonveg')}
+                                        className={cn(
+                                            "px-4 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5",
+                                            foodType === 'nonveg'
+                                                ? "bg-red-500 text-white shadow-md"
+                                                : "text-[#A89B8F] hover:text-red-400 hover:bg-red-500/10"
+                                        )}
+                                    >
+                                        <span className={cn(
+                                            "w-2 h-2 rounded-full",
+                                            foodType === 'nonveg' ? "bg-white" : "bg-red-500"
+                                        )}></span>
+                                        NON-VEG
+                                    </button>
+                                </div>
+                            </motion.div>
                         </motion.div>
                     </div>
                 </div>
@@ -132,7 +199,7 @@ export default function MenuPage() {
                 <div className="container mx-auto px-6 lg:px-8 pb-12">
                     <div className="flex items-center justify-between mb-6">
                         <p className="text-[#A89B8F]">
-                            {items.length} {items.length === 1 ? 'item' : 'items'} available
+                            {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} available
                         </p>
                     </div>
                     
@@ -142,7 +209,7 @@ export default function MenuPage() {
                                 <div key={i} className="h-[380px] rounded-3xl bg-[#2D2520] animate-pulse" />
                             ))}
                         </div>
-                    ) : items.length === 0 ? (
+                    ) : filteredItems.length === 0 ? (
                         <div className="text-center py-16">
                             <div className="w-20 h-20 rounded-full bg-[#2D2520] flex items-center justify-center mx-auto mb-4">
                                 <Search className="w-10 h-10 text-[#A89B8F]" />
@@ -156,7 +223,7 @@ export default function MenuPage() {
                             layout
                         >
                             <AnimatePresence mode="popLayout">
-                                {items.map((item, index) => (
+                                {filteredItems.map((item, index) => (
                                     <motion.div
                                         key={item.id}
                                         initial={{ opacity: 0, scale: 0.9 }}
@@ -226,12 +293,64 @@ export default function MenuPage() {
                         </button>
                     ))}
                 </div>
+
+                {/* Mobile Veg/Non-Veg Toggle */}
+                <div className="flex items-center gap-2 mt-3 overflow-x-auto scrollbar-hide">
+                    <div className="flex bg-[#1A1410] rounded-lg p-0.5 border border-white/10">
+                        {/* All Button */}
+                        <button
+                            onClick={() => setFoodType('all')}
+                            className={cn(
+                                "px-3 py-1 rounded-md text-[10px] font-bold transition-all duration-200",
+                                foodType === 'all'
+                                    ? "bg-[#D4A574] text-[#1A1410]"
+                                    : "text-[#A89B8F] hover:text-white"
+                            )}
+                        >
+                            ALL
+                        </button>
+                        
+                        {/* Veg Button */}
+                        <button
+                            onClick={() => setFoodType('veg')}
+                            className={cn(
+                                "px-3 py-1 rounded-md text-[10px] font-bold transition-all duration-200 flex items-center gap-1",
+                                foodType === 'veg'
+                                    ? "bg-green-500 text-white"
+                                    : "text-[#A89B8F] hover:text-green-400"
+                            )}
+                        >
+                            <span className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                foodType === 'veg' ? "bg-white" : "bg-green-500"
+                            )}></span>
+                            VEG
+                        </button>
+                        
+                        {/* Non-Veg Button */}
+                        <button
+                            onClick={() => setFoodType('nonveg')}
+                            className={cn(
+                                "px-3 py-1 rounded-md text-[10px] font-bold transition-all duration-200 flex items-center gap-1",
+                                foodType === 'nonveg'
+                                    ? "bg-red-500 text-white"
+                                    : "text-[#A89B8F] hover:text-red-400"
+                            )}
+                        >
+                            <span className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                foodType === 'nonveg' ? "bg-white" : "bg-red-500"
+                            )}></span>
+                            NON-VEG
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Mobile Menu Grid */}
             <div className="md:hidden container mx-auto">
                 <div className="grid grid-cols-2 gap-2 px-2">
-                    {items.map((item, index) => (
+                    {filteredItems.map((item, index) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, y: 20 }}
