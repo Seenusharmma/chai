@@ -1,0 +1,118 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
+import { PushSubscription } from '@/lib/types/push';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+export function usePushNotifications() {
+  const { user } = useUser();
+  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [vapidPublicKey, setVapidPublicKey] = useState<string>('');
+  const [isSupported, setIsSupported] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+      setIsSupported(true);
+      setPermissionStatus(Notification.permission);
+    }
+  }, []);
+
+  const getVapidKey = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/subscriptions/vapidPublicKey`);
+      setVapidPublicKey(response.data.publicKey);
+      return response.data.publicKey;
+    } catch (error) {
+      console.error('Failed to get VAPID key:', error);
+      return null;
+    }
+  }, []);
+
+  const subscribe = useCallback(async () => {
+    if (!isSupported || !user?.primaryEmailAddress?.emailAddress) return null;
+
+    try {
+      const publicKey = vapidPublicKey || await getVapidKey();
+      if (!publicKey) throw new Error('No VAPID public key');
+
+      // Use the push service worker for subscription
+      const registration = await navigator.serviceWorker.ready;
+      const pushSW = await navigator.serviceWorker.getRegistration('/push-sw.js');
+      
+      const sub = await (pushSW || registration).pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+
+      await axios.post(`${API_URL}/subscriptions/subscribe`, {
+        subscription: sub,
+        email: user.primaryEmailAddress.emailAddress,
+      });
+
+      setSubscription(sub);
+      setPermissionStatus('granted');
+      return sub;
+    } catch (error) {
+      console.error('Failed to subscribe:', error);
+      return null;
+    }
+  }, [isSupported, user, vapidPublicKey, getVapidKey]);
+
+  const unsubscribe = useCallback(async () => {
+    if (!subscription || !user?.primaryEmailAddress?.emailAddress) return;
+
+    try {
+      await axios.delete(`${API_URL}/subscriptions/unsubscribe`, {
+        data: {
+          endpoint: subscription.endpoint,
+          email: user.primaryEmailAddress.emailAddress,
+        },
+      });
+
+      await subscription.unsubscribe();
+      setSubscription(null);
+      setPermissionStatus('default');
+    } catch (error) {
+      console.error('Failed to unsubscribe:', error);
+    }
+  }, [subscription, user]);
+
+  const requestPermission = useCallback(async () => {
+    if (!isSupported) return null;
+
+    try {
+      const permission = await Notification.requestPermission();
+      setPermissionStatus(permission);
+      
+      if (permission === 'granted') {
+        return await subscribe();
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to request permission:', error);
+      return null;
+    }
+  }, [isSupported, subscribe]);
+
+  return {
+    isSupported,
+    permissionStatus,
+    subscription,
+    requestPermission,
+    subscribe,
+    unsubscribe,
+  };
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}

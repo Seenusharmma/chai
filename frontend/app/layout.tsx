@@ -48,6 +48,7 @@ export const viewport: Viewport = {
 
 import { ClerkProvider } from '@clerk/nextjs';
 import { UserProvider } from "@/lib/request/UserContext";
+import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 // ... imports
 
@@ -73,10 +74,12 @@ export default function RootLayout({
     >
       <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
         <head>
+          <link rel="manifest" href="/manifest.json" />
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
         </head>
         <body className="font-[var(--font-inter)] antialiased" suppressHydrationWarning>
 
+          <ServiceWorkerRegistration />
           <QueryProvider>
             <CartProvider>
               <UICartProvider>

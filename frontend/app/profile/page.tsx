@@ -5,11 +5,12 @@ import { User, Mail, Phone, MapPin, Settings, CreditCard, Bell, HelpCircle, LogO
 import Link from 'next/link';
 import { Navigation } from '@/components/layout/Navigation';
 import { Header } from '@/components/layout/Header';
-import { useUser } from '@clerk/nextjs';
-import { SignInButton } from '@clerk/nextjs';
+import { PushNotificationButton } from '@/components/PushNotificationButton';
+import { useUser, SignInButton, useAuth } from '@clerk/nextjs';
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
+  const { signOut } = useAuth();
 
   const menuItems = [
     { icon: CreditCard, label: 'Payment Methods', badge: '2 cards' },
@@ -204,12 +205,17 @@ export default function ProfilePage() {
           transition={{ delay: 0.3 }}
           className="space-y-3"
         >
+          <PushNotificationButton />
+
           <button className="w-full flex items-center justify-center gap-3 p-4 md:p-5 bg-[#2D2520] rounded-2xl border border-white/5 text-[#D4A574] font-semibold hover:bg-[#352D28] transition-colors">
             <CreditCard className="w-5 h-5" />
             Add Credits
           </button>
 
-          <button className="w-full flex items-center justify-center gap-3 p-4 md:p-5 bg-red-500/10 rounded-2xl border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-colors">
+          <button 
+            onClick={() => signOut()}
+            className="w-full flex items-center justify-center gap-3 p-4 md:p-5 bg-red-500/10 rounded-2xl border border-red-500/20 text-red-400 font-semibold hover:bg-red-500/20 transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             Sign Out
           </button>

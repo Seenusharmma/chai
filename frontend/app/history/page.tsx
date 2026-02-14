@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Clock, Receipt, TrendingUp, Trash2, Coffee, ChevronRight, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Clock, Receipt, TrendingUp, Trash2, Coffee, ChevronDown, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useHistory } from '@/lib/hooks/useHistory';
 import { Navigation } from '@/components/layout/Navigation';
@@ -10,6 +10,11 @@ import { Header } from '@/components/layout/Header';
 
 export default function HistoryPage() {
   const { orderHistory, totalSpent, totalOrders, clearHistory, isLoaded, isLoggedIn } = useHistory();
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const toggleOrder = (orderId: string) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -108,26 +113,26 @@ export default function HistoryPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 gap-4 mb-8"
+          className="grid grid-cols-2 gap-3 mb-6"
         >
-          <div className="bg-gradient-to-br from-[#2D2520] to-[#3A3230] rounded-2xl p-5 border border-white/5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-[#D4A574]" />
+          <div className="bg-gradient-to-br from-[#2D2520] to-[#3A3230] rounded-2xl p-4 border border-white/5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
+                <Receipt className="w-4 h-4 text-[#D4A574]" />
               </div>
-              <span className="text-[#A89B8F] text-sm">Total Orders</span>
+              <span className="text-[#A89B8F] text-xs">Orders</span>
             </div>
-            <p className="text-3xl font-bold text-white">{totalOrders}</p>
+            <p className="text-2xl font-bold text-white">{totalOrders}</p>
           </div>
 
-          <div className="bg-gradient-to-br from-[#2D2520] to-[#3A3230] rounded-2xl p-5 border border-white/5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-[#D4A574]" />
+          <div className="bg-gradient-to-br from-[#2D2520] to-[#3A3230] rounded-2xl p-4 border border-white/5">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-8 h-8 rounded-lg bg-[#D4A574]/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-[#D4A574]" />
               </div>
-              <span className="text-[#A89B8F] text-sm">Total Spent</span>
+              <span className="text-[#A89B8F] text-xs">Spent</span>
             </div>
-            <p className="text-3xl font-bold text-white">₹{totalSpent.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-white">₹{totalSpent.toFixed(0)}</p>
           </div>
         </motion.div>
 
@@ -165,47 +170,86 @@ export default function HistoryPage() {
                 transition={{ delay: index * 0.05 }}
                 className="bg-[#2D2520] rounded-2xl overflow-hidden border border-white/5"
               >
-                <div className="p-4 md:p-5 border-b border-white/5">
+                <button 
+                  onClick={() => toggleOrder(order.id)}
+                  className="w-full p-4 md:p-5 text-left"
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center shrink-0">
                         <Coffee className="w-5 h-5 text-[#D4A574]" />
                       </div>
-                      <div>
-                        <p className="font-bold text-white">Order #{order.id}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-white truncate">Order #{order.id}</p>
+                          <span className={`lg:hidden xl:hidden 2xl:hidden px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize shrink-0 ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
                         <p className="text-xs text-[#A89B8F]">{formatDate(order.createdAt)}</p>
                       </div>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
+                    <div className="hidden lg:flex items-center gap-2 shrink-0">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-[#A89B8F] transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`} />
+                    </div>
+                    <ChevronDown className={`lg:hidden w-5 h-5 text-[#A89B8F] transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`} />
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    {order.items.slice(0, 3).map((item) => (
-                      <div key={item.id} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#D4A574] font-medium">{item.quantity}x</span>
-                          <span className="text-white truncate max-w-[200px]">{item.name}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#A89B8F] text-sm">{order.items.length} {order.items.length === 1 ? 'item' : 'items'}</span>
+                    <span className="text-lg font-bold text-white">₹{order.total.toFixed(2)}</span>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {expandedOrder === order.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-t border-white/5 overflow-hidden"
+                    >
+                      <div className="p-4 md:p-5 space-y-3 bg-[#252019]/50">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-[#D4A574] font-medium shrink-0">{item.quantity}x</span>
+                              <span className="text-white truncate">{item.name}</span>
+                            </div>
+                            <span className="text-[#A89B8F] shrink-0">₹{(item.price * item.quantity).toFixed(2)}</span>
+                          </div>
+                        ))}
+                        
+                        <div className="pt-3 mt-3 border-t border-white/5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#A89B8F]">Subtotal</span>
+                            <span className="text-white">₹{order.subtotal?.toFixed(2) || order.total.toFixed(2)}</span>
+                          </div>
+                          {order.discount > 0 && (
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-[#A89B8F]">Discount</span>
+                              <span className="text-green-400">-₹{order.discount.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.deliveryFee > 0 && (
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-[#A89B8F]">Delivery</span>
+                              <span className="text-white">₹{order.deliveryFee.toFixed(2)}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                            <span className="text-white font-medium">Total</span>
+                            <span className="text-xl font-bold text-white">₹{order.total.toFixed(2)}</span>
+                          </div>
                         </div>
-                        <span className="text-[#A89B8F]">₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
-                    ))}
-                    {order.items.length > 3 && (
-                      <p className="text-xs text-[#A89B8F]">+{order.items.length - 3} more items</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                    <span className="text-[#A89B8F] text-sm">Total</span>
-                    <span className="text-xl font-bold text-white">₹{order.total.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <div className="px-4 md:px-5 py-3 bg-[#252019] flex items-center justify-between cursor-pointer hover:bg-[#2A2520] transition-colors">
-                  <span className="text-sm text-[#D4A574] font-medium">View Details</span>
-                  <ChevronRight className="w-5 h-5 text-[#D4A574]" />
-                </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))
           )}

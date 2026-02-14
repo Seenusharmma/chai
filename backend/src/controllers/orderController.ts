@@ -1,6 +1,54 @@
 import { Request, Response } from 'express';
 import Order from '../models/Order';
 import { getIO } from '../utils/socket';
+import { PushSubscription } from '../models/PushSubscription';
+import { sendPushNotification } from '../utils/webPush';
+
+const getStatusMessage = (status: string) => {
+  switch (status) {
+    case 'accepted':
+      return 'Your order has been accepted!';
+    case 'processing':
+      return 'Your order is being prepared...';
+    case 'completed':
+    case 'delivered':
+      return 'Your order has been delivered!';
+    case 'declined':
+    case 'cancelled':
+      return 'Your order has been cancelled';
+    default:
+      return `Order status: ${status}`;
+  }
+};
+
+const sendPushToUser = async (userEmail: string, orderId: string, status: string) => {
+  try {
+    const subscriptions = await PushSubscription.find({ userEmail });
+    
+    for (const sub of subscriptions) {
+      const payload = {
+        title: 'AuraCafe Order Update',
+        body: getStatusMessage(status),
+        icon: '/icon-192x192.png',
+        badge: '/icon-192x192.png',
+        tag: `order-${orderId}`,
+        data: {
+          url: `/history?orderId=${orderId}`,
+          orderId,
+          status,
+        },
+      };
+
+      const result = await sendPushNotification(sub.subscription, payload);
+      
+      if (result?.error === 'expired') {
+        await PushSubscription.deleteOne({ _id: sub._id });
+      }
+    }
+  } catch (error) {
+    console.error('Push notification error:', error);
+  }
+};
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -56,10 +104,13 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
       order.status = status;
       const updatedOrder = await order.save();
 
-      // Emit event to User
+      // Emit event to User via Socket
       const io = getIO();
       if (order.userEmail) {
         io.to(order.userEmail).emit('orderStatusUpdated', updatedOrder);
+        
+        // Send push notification
+        await sendPushToUser(order.userEmail, order._id.toString(), status);
       }
       // Also emit to admin to update their view if needed, or just broadcast
       io.emit('orderStatusUpdated', updatedOrder); 
