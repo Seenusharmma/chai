@@ -5,22 +5,30 @@ import { getVapidPublicKey } from '../utils/webPush';
 const router = express.Router();
 
 router.get('/vapidPublicKey', (req, res) => {
-  res.json({ publicKey: getVapidPublicKey() });
+  const publicKey = getVapidPublicKey();
+  console.log('VAPID Public Key requested, returning:', publicKey ? 'key exists' : 'NO KEY');
+  res.json({ publicKey });
 });
 
 router.post('/subscribe', async (req, res) => {
   try {
     const { subscription, email } = req.body;
 
+    console.log('Subscribe request received for:', email);
+
     if (!subscription || !email) {
+      console.log('Missing subscription or email');
       return res.status(400).json({ error: 'Missing subscription or email' });
     }
+
+    console.log('Subscription endpoint:', subscription.endpoint);
 
     const existingSubscription = await PushSubscription.findOne({
       'subscription.endpoint': subscription.endpoint,
     });
 
     if (existingSubscription) {
+      console.log('Subscription already exists');
       return res.json({ message: 'Subscription already exists' });
     }
 
@@ -30,6 +38,7 @@ router.post('/subscribe', async (req, res) => {
     });
 
     await newSubscription.save();
+    console.log('Subscription saved successfully');
 
     res.json({ message: 'Subscription saved successfully' });
   } catch (error) {

@@ -1,17 +1,26 @@
 import webpush from 'web-push';
 import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const publicKey = process.env.VAPID_PUBLIC_KEY || '';
 const privateKey = process.env.VAPID_PRIVATE_KEY || '';
 const subject = process.env.VAPID_SUBJECT || '';
 
-webpush.setVapidDetails(
-  subject,
-  publicKey,
-  privateKey
-);
+console.log('VAPID Public Key loaded:', publicKey ? 'Yes' : 'No');
+console.log('VAPID Private Key loaded:', privateKey ? 'Yes' : 'No');
+console.log('VAPID Subject loaded:', subject ? 'Yes' : 'No');
+
+if (!publicKey || !privateKey || !subject) {
+  console.error('ERROR: VAPID keys not properly configured!');
+} else {
+  webpush.setVapidDetails(
+    subject,
+    publicKey,
+    privateKey
+  );
+}
 
 export const getVapidPublicKey = () => publicKey;
 

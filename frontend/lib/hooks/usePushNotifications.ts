@@ -4,6 +4,8 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+console.log('Push Notifications - API URL:', API_URL);
+
 export function usePushNotifications() {
   const { user } = useUser();
   const [subscription, setSubscription] = useState<any>(null);
@@ -15,16 +17,21 @@ export function usePushNotifications() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true);
       setPermissionStatus(Notification.permission);
+      console.log('Push notifications supported, current permission:', Notification.permission);
+    } else {
+      console.log('Push notifications NOT supported in this browser');
     }
   }, []);
 
   const getVapidKey = useCallback(async () => {
     try {
+      console.log('Fetching VAPID public key from:', `${API_URL}/subscriptions/vapidPublicKey`);
       const response = await axios.get(`${API_URL}/subscriptions/vapidPublicKey`);
+      console.log('VAPID response:', response.data);
       setVapidPublicKey(response.data.publicKey);
       return response.data.publicKey;
-    } catch (error) {
-      console.error('Failed to get VAPID key:', error);
+    } catch (error: any) {
+      console.error('Failed to get VAPID key:', error.message);
       return null;
     }
   }, []);

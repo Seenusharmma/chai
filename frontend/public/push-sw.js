@@ -1,39 +1,40 @@
-// Custom Service Worker for Push Notifications
-// This file handles push notifications separately from the caching service worker
+// Push Notification Service Worker
+// Plain JavaScript - no TypeScript annotations
 
 const CACHE_NAME = 'push-notification-cache-v1';
 
-// Install event - cache essential files
-self.addEventListener('install', (event) => {
+self.addEventListener('install', function(event) {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+          .filter(function(name) {
+            return name !== CACHE_NAME;
+          })
+          .map(function(name) {
+            return caches.delete(name);
+          })
       );
     })
   );
   self.clients.claim();
 });
 
-// Push notification handler
-self.addEventListener('push', function(event: any) {
+self.addEventListener('push', function(event) {
   if (!event.data) return;
 
-  let data = {};
+  var data = {};
   try {
     data = event.data.json();
   } catch (e) {
     data = { body: event.data.text() };
   }
 
-  const options = {
+  var options = {
     body: data.body || 'You have a new notification',
     icon: data.icon || '/icon-192x192.png',
     badge: data.badge || '/icon-192x192.png',
@@ -44,13 +45,13 @@ self.addEventListener('push', function(event: any) {
     actions: [
       {
         action: 'view',
-        title: 'View',
+        title: 'View'
       },
       {
         action: 'dismiss',
-        title: 'Dismiss',
-      },
-    ],
+        title: 'Dismiss'
+      }
+    ]
   };
 
   event.waitUntil(
@@ -58,20 +59,23 @@ self.addEventListener('push', function(event: any) {
   );
 });
 
-// Notification click handler
-self.addEventListener('notificationclick', function(event: any) {
+self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
   if (event.action === 'dismiss') {
     return;
   }
 
-  const urlToOpen = event.notification.data?.url || '/history';
+  var urlToOpen = '/history';
+  if (event.notification.data && event.notification.data.url) {
+    urlToOpen = event.notification.data.url;
+  }
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(urlToOpen) && 'focus' in client) {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      for (var i = 0; i < clientList.length; i++) {
+        var client = clientList[i];
+        if (client.url.indexOf(urlToOpen) !== -1 && 'focus' in client) {
           return client.focus();
         }
       }
@@ -82,7 +86,6 @@ self.addEventListener('notificationclick', function(event: any) {
   );
 });
 
-// Handle notification close
-self.addEventListener('notificationclose', function(event: any) {
-  console.log('Notification was closed', event);
+self.addEventListener('notificationclose', function(event) {
+  console.log('Notification was closed');
 });

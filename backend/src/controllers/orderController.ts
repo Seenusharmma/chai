@@ -23,7 +23,15 @@ const getStatusMessage = (status: string) => {
 
 const sendPushToUser = async (userEmail: string, orderId: string, status: string) => {
   try {
+    console.log('Sending push notification to:', userEmail, 'for order:', orderId, 'status:', status);
+    
     const subscriptions = await PushSubscription.find({ userEmail });
+    console.log('Found subscriptions:', subscriptions.length);
+    
+    if (subscriptions.length === 0) {
+      console.log('No subscriptions found for user');
+      return;
+    }
     
     for (const sub of subscriptions) {
       const payload = {
@@ -39,10 +47,16 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
         },
       };
 
+      console.log('Sending push notification to endpoint:', sub.subscription.endpoint);
       const result = await sendPushNotification(sub.subscription, payload);
       
       if (result?.error === 'expired') {
+        console.log('Subscription expired, removing...');
         await PushSubscription.deleteOne({ _id: sub._id });
+      } else if (result?.error === 'failed') {
+        console.log('Push notification failed');
+      } else {
+        console.log('Push notification sent successfully');
       }
     }
   } catch (error) {
