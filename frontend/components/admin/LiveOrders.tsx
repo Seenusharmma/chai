@@ -110,6 +110,7 @@ export function LiveOrders() {
                                     type: order.diningMode,
                                     timeAgo: getTimeAgo(order.createdAt),
                                     address: order.address,
+                                    location: order.location,
                                 }}
                                 onAccept={handleAccept}
                                 onDecline={handleDecline}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Check, X, Clock } from 'lucide-react';
+import { Check, X, Clock, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 export interface OrderItem {
@@ -22,6 +22,7 @@ export interface AdminOrder {
     type: string;
     timeAgo: string;
     address?: string;
+    location?: string;
 }
 
 interface AdminOrderCardProps {
@@ -89,6 +90,15 @@ export function AdminOrderCard({ order, onAccept, onDecline }: AdminOrderCardPro
                         <p className="text-[#D4A574] text-xs">
                             <span className="font-bold">Address:</span> {order.address}
                         </p>
+                    )}
+                    {order.location && (
+                        <button
+                            onClick={() => window.open(order.location, '_blank')}
+                            className="w-full mt-2 py-2 px-3 bg-[#8B5E3C]/20 hover:bg-[#8B5E3C]/30 border border-[#8B5E3C]/30 rounded-lg flex items-center justify-center gap-2 text-[#D4A574] text-xs font-medium transition-colors"
+                        >
+                            <MapPin className="w-4 h-4" />
+                            Track Location on Map
+                        </button>
                     )}
                 </div>
             )}

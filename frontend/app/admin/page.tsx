@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit2, Trash2, TrendingUp, Menu, X, Coffee, ShoppingCart, Clock, CheckCircle, Check, Users, History, Archive, DollarSign, Receipt, CircleDot, RotateCcw } from 'lucide-react';
+import { Plus, Edit2, Trash2, TrendingUp, Menu, X, Coffee, ShoppingCart, Clock, CheckCircle, Check, Users, History, Archive, DollarSign, Receipt, CircleDot, RotateCcw, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { useMenu } from '@/lib/hooks/useMenu';
 import { useAdminOrders } from '@/lib/hooks/useAdminOrders';
@@ -268,6 +268,15 @@ export default function AdminDashboard() {
                                                     )}
                                                     {order.diningMode === 'parcel' && order.address && (
                                                         <p className="text-[10px] text-[#A89B8F] max-w-[150px] truncate">{order.address}</p>
+                                                    )}
+                                                    {order.diningMode === 'parcel' && (order as any).location && (
+                                                        <button
+                                                            onClick={() => window.open((order as any).location, '_blank')}
+                                                            className="flex items-center gap-1 text-[10px] text-[#D4A574] hover:text-[#E8C9A0] transition-colors"
+                                                        >
+                                                            <MapPin className="w-3 h-3" />
+                                                            Track
+                                                        </button>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2">

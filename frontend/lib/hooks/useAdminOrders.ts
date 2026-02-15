@@ -16,24 +16,30 @@ export interface AdminOrder {
   createdAt: string;
   phoneNumber?: string;
   address?: string;
+  location?: string;
   userEmail?: string;
 }
 
 // Fetch all orders
 const fetchOrders = async (): Promise<AdminOrder[]> => {
   const response = await api.get('/orders');
-  return response.data.map((o: any) => ({
-    id: o._id,
-    items: o.items,
-    total: o.totalAmount,
-    status: o.status,
-    customerName: o.customerName,
-    diningMode: o.orderType,
-    createdAt: o.createdAt,
-    phoneNumber: o.phoneNumber,
-    address: o.address,
-    userEmail: o.userEmail
-  }));
+  return response.data.map((o: any) => {
+    const address = o.address || '';
+    const isMapUrl = address.startsWith('https://maps.google.com/?q=');
+    return {
+      id: o._id,
+      items: o.items,
+      total: o.totalAmount,
+      status: o.status,
+      customerName: o.customerName,
+      diningMode: o.orderType,
+      createdAt: o.createdAt,
+      phoneNumber: o.phoneNumber,
+      address: isMapUrl ? '' : address,
+      location: isMapUrl ? address : undefined,
+      userEmail: o.userEmail
+    };
+  });
 };
 
 export function useAdminOrders() {
