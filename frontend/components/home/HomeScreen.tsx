@@ -13,7 +13,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
             {/* Hero Section */}
             <section className="relative px-6 pt-8 pb-0 md:py-24 md:px-12 overflow-hidden flex flex-col md:flex-row items-center justify-between min-h-0 md:min-h-[70vh]">
                 <div className="relative z-10 max-w-xs md:max-w-lg md:w-1/2">
-                    <h2 className="text-4xl md:text-7xl font-extrabold leading-tight mb-4 md:mb-6 tracking-tight">
+                    <h2 
+                        className="text-4xl md:text-7xl font-extrabold leading-tight mb-4 md:mb-6 tracking-tight"
+                        style={{
+                            fontFamily: 'Italiana, Italiana Fallback, serif',
+                            fontWeight: 600,
+                        }}
+                    >
                         Fresh <span className="text-primary">Coffee</span>. <br />
                         <span className='text-[#D4A574]'>Delicious</span> Food.
                     </h2>
@@ -94,6 +100,47 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
                             <div className="flex items-center justify-between mt-auto">
                                 <span className="text-primary font-bold text-sm md:text-lg">₹{product.price.toFixed(2)}</span>
                                 <AddToCartButton item={product} size="md" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Special Foods Section */}
+            <section className="px-6 md:px-12 pb-20 md:pb-24">
+                <div className="flex items-center justify-between mb-6 md:mb-12">
+                    <div>
+                        <h3 className="text-xl md:text-3xl font-bold">Special Foods</h3>
+                        <p className="text-stone-500 text-sm md:text-base mt-1">Oribon's special delicacies</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-primary"></span>
+                        <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-primary/20"></span>
+                        <span className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-primary/20"></span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-8">
+                    {PRODUCTS.filter(p => p.isFeatured).slice(0, 6).map(product => (
+                        <div key={product.id} className="bg-gradient-to-br from-[#2D2520] to-[#1A1410] border border-primary/20 rounded-xl lg:rounded-2xl p-2 lg:p-4 shadow-lg group hover:border-primary/40 transition-all hover:-translate-y-1 hover:shadow-xl">
+                            <div className="relative mb-2 lg:mb-4 h-28 lg:h-40 rounded-lg lg:rounded-xl overflow-hidden bg-black/30">
+                                <img
+                                    alt={product.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                                    src={product.image}
+                                />
+                                <div className="absolute top-2 right-2 bg-primary/90 backdrop-blur-md px-1.5 py-0.5 rounded lg:px-2 lg:py-1 flex items-center gap-0.5 lg:gap-1">
+                                    <span className="material-icons-round text-[8px] lg:text-xs text-white">star</span>
+                                    <span className="text-[8px] lg:text-xs text-white font-bold">{product.rating}</span>
+                                </div>
+                                <div className="absolute top-2 left-2 bg-red-500/80 backdrop-blur-md px-1.5 py-0.5 rounded lg:px-2 lg:py-1">
+                                    <span className="text-[8px] lg:text-xs text-white font-medium">Special</span>
+                                </div>
+                            </div>
+                            <h4 className="font-bold text-xs lg:text-sm mb-1 lg:mb-2 truncate">{product.name}</h4>
+                            <p className="text-stone-400 text-[10px] lg:text-xs mb-1 lg:mb-2 line-clamp-1">{product.description}</p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-primary font-bold text-sm lg:text-base">₹{product.price.toFixed(2)}</span>
+                                <AddToCartButton item={product} size="sm" />
                             </div>
                         </div>
                     ))}

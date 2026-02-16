@@ -10,6 +10,7 @@ import { Category } from '@/lib/types';
 import { cn } from '@/lib/utils/cn';
 import { Header } from '@/components/layout/Header';
 import { MenuItem } from '@/components/menu/MenuItem';
+import { MenuGrid } from '@/components/menu/MenuGrid';
 
 type FoodType = 'all' | 'veg' | 'nonveg';
 
@@ -203,40 +204,20 @@ export default function MenuPage() {
                         </p>
                     </div>
                     
-                    {isLoading ? (
-                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {[...Array(8)].map((_, i) => (
-                                <div key={i} className="h-[380px] rounded-3xl bg-[#2D2520] animate-pulse" />
-                            ))}
-                        </div>
-                    ) : filteredItems.length === 0 ? (
-                        <div className="text-center py-16">
-                            <div className="w-20 h-20 rounded-full bg-[#2D2520] flex items-center justify-center mx-auto mb-4">
-                                <Search className="w-10 h-10 text-[#A89B8F]" />
+                    {isLoading || filteredItems.length === 0 ? (
+                        !isLoading && filteredItems.length === 0 ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 rounded-full bg-[#2D2520] flex items-center justify-center mx-auto mb-4">
+                                    <Search className="w-10 h-10 text-[#A89B8F]" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-white mb-2">No items found</h3>
+                                <p className="text-[#A89B8F]">Try adjusting your search or category</p>
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">No items found</h3>
-                            <p className="text-[#A89B8F]">Try adjusting your search or category</p>
-                        </div>
+                        ) : (
+                            <MenuGrid items={[]} isLoading={isLoading} />
+                        )
                     ) : (
-                        <motion.div 
-                            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                            layout
-                        >
-                            <AnimatePresence mode="popLayout">
-                                {filteredItems.map((item, index) => (
-                                    <motion.div
-                                        key={item.id}
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                                        layout
-                                    >
-                                        <MenuItem item={item} />
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
+                        <MenuGrid items={filteredItems} />
                     )}
                 </div>
             </div>

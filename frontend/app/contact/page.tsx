@@ -30,9 +30,9 @@ export default function ContactPage() {
     };
 
     const contactInfo = [
-        { icon: Phone, label: 'Phone', value: '+91 98765 43210', color: 'bg-green-500/10 text-green-400' },
-        { icon: Mail, label: 'Email', value: 'hello@auracafe.com', color: 'bg-blue-500/10 text-blue-400' },
-        { icon: MapPin, label: 'Address', value: 'Mumbai, Maharashtra, India', color: 'bg-purple-500/10 text-purple-400' },
+        { icon: Phone, label: 'Phone', value: '+91 8984624645', color: 'bg-green-500/10 text-green-400' },
+        { icon: Mail, label: 'Email', value: 'oriboncafe@gmail.com', color: 'bg-blue-500/10 text-blue-400' },
+        { icon: MapPin, label: 'Address', value: 'Bhubaneswar, Odisha, India', color: 'bg-purple-500/10 text-purple-400' },
         { icon: Clock, label: 'Hours', value: 'Mon-Sun: 8AM - 10PM', color: 'bg-amber-500/10 text-amber-400' },
     ];
 
@@ -56,7 +56,7 @@ export default function ContactPage() {
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D4A574] to-[#8B6F47] flex items-center justify-center">
                             <span className="text-white font-bold text-sm">A</span>
                         </div>
-                        <span className="font-bold text-white">Aura<span className="text-[#D4A574]">Café</span></span>
+                        <span className="font-bold text-white">Oribon<span className="text-[#D4A574]">Café</span></span>
                     </Link>
                 </div>
             </div>

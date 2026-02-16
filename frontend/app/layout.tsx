@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Italiana } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { Navigation } from "@/components/layout/Navigation";
@@ -15,6 +15,13 @@ const inter = Inter({
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const italiana = Italiana({
+  variable: "--font-italiana",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -72,7 +79,7 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <html lang="en" className={`${inter.variable} ${playfair.variable} ${italiana.variable}`} suppressHydrationWarning>
         <head>
           <link rel="manifest" href="/manifest.json" />
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />

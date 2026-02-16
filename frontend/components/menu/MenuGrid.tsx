@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { MenuItem as MenuItemType } from '@/lib/types';
 import { MenuItem } from './MenuItem';
+import { MenuItemSkeleton } from './MenuItemSkeleton';
 
 interface MenuGridProps {
     items: MenuItemType[];
@@ -14,7 +15,7 @@ export function MenuGrid({ items, isLoading }: MenuGridProps) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                    <div key={i} className="h-[400px] rounded-3xl bg-[#2D2520] animate-pulse" />
+                    <MenuItemSkeleton key={i} />
                 ))}
             </div>
         );
