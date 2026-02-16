@@ -246,11 +246,16 @@ export default function ContactPage() {
                             transition={{ delay: 0.7 }}
                             className="bg-[#2D2520] rounded-3xl p-2 border border-white/5"
                         >
-                            <div className="aspect-video rounded-2xl bg-gradient-to-br from-[#3A3230] to-[#252019] flex items-center justify-center">
-                                <div className="text-center">
-                                    <MapPin className="w-12 h-12 text-[#D4A574] mx-auto mb-2" />
-                                    <p className="text-white font-medium">View on Map</p>
-                                </div>
+                            <div className="aspect-video rounded-2xl overflow-hidden">
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3742.5504179999996!2d85.7252955!3d20.2337899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a19a96915a24583%3A0xacb5fdd8c9da92eb!2sSri%20Ram%20Sanitary%20and%20hardware!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                />
                             </div>
                         </motion.div>
                     </div>
