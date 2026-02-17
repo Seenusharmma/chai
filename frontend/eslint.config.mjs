@@ -20,6 +20,7 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "warn",
       "react/no-unescaped-entities": "warn",
       "@next/next/no-img-element": "warn",
+      "@typescript-eslint/triple-slash-reference": "off",
     },
   },
 ];

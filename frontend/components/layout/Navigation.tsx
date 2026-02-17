@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home, Coffee, ShoppingBag, History, User, LogIn } from 'lucide-react';
@@ -71,10 +72,12 @@ export function Navigation() {
                             )}
                         >
                             {user.imageUrl ? (
-                                <img 
+                                <Image 
                                     src={user.imageUrl} 
                                     alt={user.fullName || 'User'} 
-                                    className="w-6 h-6 rounded-full object-cover"
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full object-cover"
                                 />
                             ) : (
                                 <User className={cn("w-6 h-6", pathname === '/profile' && "fill-current")} />

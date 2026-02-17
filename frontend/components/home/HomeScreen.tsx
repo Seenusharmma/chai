@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { menuItems as PRODUCTS } from '../../lib/data/menu';
 import { MenuItem as Product } from '../../lib/types';
 import { AddToCartButton } from '../cart/AddToCartButton';
@@ -38,10 +39,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
                 {/* Floating Coffee Image - Absolute on Mobile, Relative/Flex on Desktop */}
                 <div className="absolute -right-12 top-4 w-64 h-64 md:static md:w-1/2 md:h-auto md:flex md:justify-end pointer-events-none md:pointer-events-auto opacity-90 animate-bounce transition-all duration-1000" style={{ animationDuration: '3s' }}>
                     <div className="relative w-full h-full md:w-[500px] md:h-[500px]">
-                        <img
+                        <Image
                             alt="Floating Coffee"
-                            className="w-full h-full object-contain drop-shadow-2xl rounded-full"
+                            fill
+                            className="object-contain drop-shadow-2xl rounded-full"
                             src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9RlZ7-a53d-f44K8-AB2zYnpzSDXAf4rvjOQOg-X1WPbrzu6TReeBINpt_mhD5rLHWjhYjx_Rsl4YW7Xnqq8rnHRSATHfq1d5SCoTlQgBnAgf-xMSDlH5PpKyHaiLdpLBT24hZsHuRLTDWKcrXnOif2yeZ3nTSxISZgEOsjradeikdflTNN1wAgTVIK9a-nV7Ad1PpJel0l2bTcP83sgU7J5NqJJs0kkwlngf621E6RGCqdxnh-ICRdwBHv0poMUvqAOajnmZ6oti"
+                            sizes="(max-width: 768px) 256px, 500px"
                         />
                     </div>
                 </div>
@@ -85,10 +88,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
                     {PRODUCTS.slice(0, 4).map(product => (
                         <div key={product.id} className="bg-white/5 border border-primary/5 rounded-2xl md:rounded-3xl p-3 md:p-5 shadow-sm group hover:border-primary/30 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5">
                             <div className="relative mb-3 md:mb-5 h-32 md:h-64 rounded-xl md:rounded-2xl overflow-hidden bg-black/20">
-                                <img
+                                <Image
                                     alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                                     src={product.image}
+                                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                 />
                                 <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-black/40 backdrop-blur-md px-1.5 py-0.5 md:px-3 md:py-1.5 rounded-lg md:rounded-xl flex items-center gap-1">
                                     <span className="material-icons-round text-[12px] md:text-sm text-yellow-400">star</span>
@@ -123,10 +128,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
                     {PRODUCTS.filter(p => p.isFeatured).slice(0, 6).map(product => (
                         <div key={product.id} className="bg-gradient-to-br from-[#2D2520] to-[#1A1410] border border-primary/20 rounded-xl lg:rounded-2xl p-2 lg:p-4 shadow-lg group hover:border-primary/40 transition-all hover:-translate-y-1 hover:shadow-xl">
                             <div className="relative mb-2 lg:mb-4 h-28 lg:h-40 rounded-lg lg:rounded-xl overflow-hidden bg-black/30">
-                                <img
+                                <Image
                                     alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                                     src={product.image}
+                                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 33vw"
                                 />
                                 <div className="absolute top-2 right-2 bg-primary/90 backdrop-blur-md px-1.5 py-0.5 rounded lg:px-2 lg:py-1 flex items-center gap-0.5 lg:gap-1">
                                     <span className="material-icons-round text-[8px] lg:text-xs text-white">star</span>

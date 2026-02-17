@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { User, Mail, Phone, MapPin, Settings, CreditCard, Bell, HelpCircle, LogOut, Instagram, Facebook, ArrowLeft, Award } from 'lucide-react';
 import Link from 'next/link';
 import { Navigation } from '@/components/layout/Navigation';
@@ -101,10 +102,12 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-[#D4A574] shadow-lg">
-                <img
+                <Image
                   src={userData.avatar}
                   alt={userData.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="128px"
                 />
               </div>
               <button className="absolute bottom-0 right-0 w-8 h-8 bg-[#D4A574] rounded-full flex items-center justify-center shadow-lg hover:bg-[#C49564] transition-colors">

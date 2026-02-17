@@ -80,7 +80,7 @@ export default function RootLayout({
       }}
     >
       <html lang="en" className={`${inter.variable} ${playfair.variable} ${italiana.variable}`} suppressHydrationWarning>
-        <head>
+        <head suppressHydrationWarning>
           <link rel="manifest" href="/manifest.json" />
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
         </head>
