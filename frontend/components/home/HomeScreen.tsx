@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { menuItems as PRODUCTS } from '../../lib/data/menu';
 import { MenuItem as Product } from '../../lib/types';
 import { AddToCartButton } from '../cart/AddToCartButton';
+import GallerySection from './GallerySection';
 
 interface HomeScreenProps {
     onOrderNow: () => void;
@@ -153,6 +154,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOrderNow }) => {
                     ))}
                 </div>
             </section>
+
+            {/* Gallery Section */}
+            <GallerySection />
         </div>
     );
 };
