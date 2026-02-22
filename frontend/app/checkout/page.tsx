@@ -4,7 +4,7 @@ import { ChevronLeft, Utensils, PlusCircle, ArrowRight, CheckCircle } from 'luci
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, SignInButton } from '@clerk/nextjs';
 import { CartItem } from '@/components/cart/CartItem';
 import { useCart } from '@/lib/hooks/CartContext';
 import { useHistory } from '@/lib/hooks/useHistory';
@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils/cn';
 import { createOrder } from '@/lib/api';
 
 export default function CheckoutPage() {
-    const { user } = useUser();
-    const { cart, itemCount, subtotal, tax, total, clearCart } = useCart();
+    const { user, isLoaded: isUserLoaded } = useUser();
+    const { cart, itemCount, subtotal, tax, total, clearCart, isLoaded: isCartLoaded } = useCart();
     const { addOrder } = useHistory();
     // const { addOrder: addAdminOrder } = useAdminOrders(); // Removed usage
     const router = useRouter();
@@ -115,6 +115,107 @@ const [address, setAddress] = useState('');
                 </div>
             </main>
         )
+    }
+
+    const isLoading = !isUserLoaded || !isCartLoaded;
+
+    if (isLoading) {
+        return (
+            <main className="min-h-screen bg-[#1A1410] pb-32 md:pb-0 font-['Outfit']">
+                {/* Mobile Header */}
+                <div className="sticky top-0 z-50 bg-[#1A1410] px-4 py-4 flex items-center justify-between mb-4 md:hidden">
+                    <div className="w-10 h-10 rounded-full bg-[#2D2520] animate-pulse" />
+                    <div className="w-24 h-6 bg-[#2D2520] rounded-lg animate-pulse" />
+                    <div className="w-10" />
+                </div>
+
+                <div className="container mx-auto px-4 space-y-8 md:hidden">
+                    {/* Your Order Skeleton */}
+                    <section>
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="w-24 h-5 bg-[#2D2520] rounded animate-pulse" />
+                            <div className="w-16 h-4 bg-[#2D2520] rounded animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="bg-[#2D2520] p-3 rounded-xl">
+                                    <div className="flex gap-3">
+                                        <div className="w-16 h-16 bg-[#3A3230] rounded-lg animate-pulse" />
+                                        <div className="flex-1 space-y-2">
+                                            <div className="w-24 h-4 bg-[#3A3230] rounded animate-pulse" />
+                                            <div className="w-16 h-3 bg-[#3A3230] rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Dining Toggle Skeleton */}
+                    <section className="bg-[#2D2520] p-1.5 rounded-2xl">
+                        <div className="flex gap-4 py-3">
+                            <div className="flex-1 h-4 bg-[#3A3230] rounded animate-pulse" />
+                            <div className="flex-1 h-4 bg-[#3A3230] rounded animate-pulse" />
+                        </div>
+                    </section>
+
+                    {/* Customer Details Skeleton */}
+                    <section>
+                        <div className="w-32 h-5 bg-[#2D2520] rounded animate-pulse mb-4" />
+                        <div className="space-y-4">
+                            <div className="space-y-1">
+                                <div className="w-20 h-3 bg-[#2D2520] rounded animate-pulse" />
+                                <div className="w-full h-12 bg-[#2D2520] rounded-xl animate-pulse" />
+                            </div>
+                            <div className="space-y-1">
+                                <div className="w-28 h-3 bg-[#2D2520] rounded animate-pulse" />
+                                <div className="w-full h-12 bg-[#2D2520] rounded-xl animate-pulse" />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Summary Skeleton */}
+                    <div className="space-y-4 pt-4">
+                        <div className="space-y-3 pb-6 border-b border-white/5">
+                            <div className="flex justify-between">
+                                <div className="w-16 h-4 bg-[#2D2520] rounded animate-pulse" />
+                                <div className="w-16 h-4 bg-[#2D2520] rounded animate-pulse" />
+                            </div>
+                            <div className="flex justify-between">
+                                <div className="w-20 h-4 bg-[#2D2520] rounded animate-pulse" />
+                                <div className="w-16 h-4 bg-[#2D2520] rounded animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="flex justify-between">
+                            <div className="w-24 h-5 bg-[#2D2520] rounded animate-pulse" />
+                            <div className="w-20 h-6 bg-[#2D2520] rounded animate-pulse" />
+                        </div>
+                        <div className="w-full h-14 bg-[#2D2520] rounded-xl animate-pulse" />
+                    </div>
+                </div>
+
+                {/* Desktop Loading */}
+                <div className="hidden md:block pt-20">
+                    <div className="text-[#A89B8F]">Loading...</div>
+                </div>
+            </main>
+        );
+    }
+
+    if (!user) {
+        return (
+            <main className="min-h-screen bg-[#1A1410] flex flex-col items-center justify-center p-4">
+                <div className="text-center">
+                    <h1 className="font-heading text-3xl font-bold text-white mb-4">Sign In Required</h1>
+                    <p className="text-[#A89B8F] mb-8">Please sign in to checkout</p>
+                    <SignInButton mode="modal">
+                        <button className="bg-[#8B5E3C] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#6F4E37] transition-colors">
+                            Sign In
+                        </button>
+                    </SignInButton>
+                </div>
+            </main>
+        );
     }
 
     return (

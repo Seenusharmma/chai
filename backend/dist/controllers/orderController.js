@@ -35,12 +35,15 @@ const getStatusMessage = (status) => {
     }
 };
 const getAdminNotificationMessage = (order, isNewOrder = false) => {
+    var _a;
     if (isNewOrder) {
-        return `New order #${order._id} - ₹${order.totalAmount}`;
+        const itemNames = ((_a = order.items) === null || _a === void 0 ? void 0 : _a.map((item) => `${item.quantity}x ${item.name}`).join(', ')) || 'Unknown items';
+        const userInfo = order.userEmail ? ` (${order.userEmail})` : '';
+        return `${itemNames}${userInfo} - ₹${order.totalAmount}`;
     }
     return `Order #${order._id} status: ${order.status}`;
 };
-const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaiter(void 0, [userEmail_1, orderId_1, status_1, ...args_1], void 0, function* (userEmail, orderId, status, isAdmin = false) {
+const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaiter(void 0, [userEmail_1, orderId_1, status_1, ...args_1], void 0, function* (userEmail, orderId, status, isAdmin = false, orderData) {
     try {
         console.log(`[Push] Sending to: ${userEmail}, isAdmin: ${isAdmin}`);
         const subscriptions = yield PushSubscription_1.PushSubscription.find({ userEmail: userEmail.toLowerCase() });
@@ -51,9 +54,11 @@ const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaite
         }
         for (const sub of subscriptions) {
             const payload = {
-                title: isAdmin ? '🔔 New Order Alert!' : 'AuraCafe Order Update',
+                title: isAdmin
+                    ? (status === 'pending' ? '🛒 New Order Received!' : 'Order Update')
+                    : 'AuraCafe Order Update',
                 body: isAdmin
-                    ? getAdminNotificationMessage({ _id: orderId, status, totalAmount: 0 }, status === 'pending')
+                    ? getAdminNotificationMessage(orderData || { _id: orderId, status, totalAmount: 0, items: [], userEmail: '' }, status === 'pending')
                     : getStatusMessage(status),
                 icon: '/icon-192x192.png',
                 badge: '/icon-192x192.png',
@@ -87,7 +92,7 @@ const sendPushToAdmin = (order_1, ...args_1) => __awaiter(void 0, [order_1, ...a
     var _a;
     console.log(`[Push] === Sending to ADMIN ===`);
     console.log(`[Push] Admin email: ${ADMIN_EMAIL}`);
-    yield sendPushToUser(ADMIN_EMAIL.toLowerCase(), ((_a = order._id) === null || _a === void 0 ? void 0 : _a.toString()) || order._id, order.status || 'pending', true);
+    yield sendPushToUser(ADMIN_EMAIL.toLowerCase(), ((_a = order._id) === null || _a === void 0 ? void 0 : _a.toString()) || order._id, order.status || 'pending', true, order);
 });
 // @desc    Create new order
 // @route   POST /api/orders

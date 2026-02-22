@@ -25,12 +25,14 @@ const getStatusMessage = (status: string) => {
 
 const getAdminNotificationMessage = (order: any, isNewOrder: boolean = false) => {
   if (isNewOrder) {
-    return `New order #${order._id} - ₹${order.totalAmount}`;
+    const itemNames = order.items?.map((item: any) => `${item.quantity}x ${item.name}`).join(', ') || 'Unknown items';
+    const userInfo = order.userEmail ? ` (${order.userEmail})` : '';
+    return `${itemNames}${userInfo} - ₹${order.totalAmount}`;
   }
   return `Order #${order._id} status: ${order.status}`;
 };
 
-const sendPushToUser = async (userEmail: string, orderId: string, status: string, isAdmin: boolean = false) => {
+const sendPushToUser = async (userEmail: string, orderId: string, status: string, isAdmin: boolean = false, orderData?: any) => {
   try {
     console.log(`[Push] Sending to: ${userEmail}, isAdmin: ${isAdmin}`);
     
@@ -44,9 +46,11 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
     
     for (const sub of subscriptions) {
       const payload = {
-        title: isAdmin ? '🔔 New Order Alert!' : 'AuraCafe Order Update',
+        title: isAdmin 
+          ? (status === 'pending' ? '🛒 New Order Received!' : 'Order Update') 
+          : 'AuraCafe Order Update',
         body: isAdmin 
-          ? getAdminNotificationMessage({ _id: orderId, status, totalAmount: 0 }, status === 'pending')
+          ? getAdminNotificationMessage(orderData || { _id: orderId, status, totalAmount: 0, items: [], userEmail: '' }, status === 'pending')
           : getStatusMessage(status),
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
@@ -79,7 +83,7 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
 const sendPushToAdmin = async (order: any, isNewOrder: boolean = false) => {
   console.log(`[Push] === Sending to ADMIN ===`);
   console.log(`[Push] Admin email: ${ADMIN_EMAIL}`);
-  await sendPushToUser(ADMIN_EMAIL.toLowerCase(), order._id?.toString() || order._id, order.status || 'pending', true);
+  await sendPushToUser(ADMIN_EMAIL.toLowerCase(), order._id?.toString() || order._id, order.status || 'pending', true, order);
 };
 
 // @desc    Create new order
