@@ -5,6 +5,7 @@ import { PushSubscription } from '../models/PushSubscription';
 import { sendPushNotification } from '../utils/webPush';
 
 const ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'roshansharma404error@gmail.com';
+const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 
 const getStatusMessage = (status: string) => {
   switch (status) {
@@ -54,6 +55,7 @@ const sendPushToUser = async (userEmail: string, orderId: string, status: string
           : getStatusMessage(status),
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
+        sound: `${APP_URL}/notification.wav`,
         tag: `order-${orderId}`,
         data: {
           url: isAdmin ? `/admin` : `/history?orderId=${orderId}`,

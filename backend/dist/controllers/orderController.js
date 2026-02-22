@@ -18,6 +18,7 @@ const socket_1 = require("../utils/socket");
 const PushSubscription_1 = require("../models/PushSubscription");
 const webPush_1 = require("../utils/webPush");
 const ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || 'roshansharma404error@gmail.com';
+const APP_URL = process.env.APP_URL || 'http://localhost:3000';
 const getStatusMessage = (status) => {
     switch (status) {
         case 'accepted':
@@ -62,6 +63,7 @@ const sendPushToUser = (userEmail_1, orderId_1, status_1, ...args_1) => __awaite
                     : getStatusMessage(status),
                 icon: '/icon-192x192.png',
                 badge: '/icon-192x192.png',
+                sound: `${APP_URL}/notification.wav`,
                 tag: `order-${orderId}`,
                 data: {
                     url: isAdmin ? `/admin` : `/history?orderId=${orderId}`,
